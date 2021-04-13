@@ -25,7 +25,7 @@ from requests import get  # to make GET request
 
 # 텔레그램 봇
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CallbackQueryHandler, CommandHandler
+from telegram.ext import Updater, CallbackQueryHandler, CommandHandler, MessageHandler , Filters
 
 
 # 참고 문서
@@ -653,6 +653,7 @@ def main():
     bot.sendMessage(chat_id=chat_id, text='/start 를 눌러 시작해보세요 ')
 
     updater = Updater( token=BOT_TOKEN, use_context=True )
+    # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
 
     def cmd_task_buttons(update, context):
@@ -675,6 +676,7 @@ def main():
 
     def start(update, context):
         task_buttons =  [
+            [ InlineKeyboardButton( '마법공식 입력모드', callback_data=0 ) ],
             [ InlineKeyboardButton( '1.마법공식 종목받기', callback_data=1 ), InlineKeyboardButton( '2.준비중', callback_data=2 ) ], 
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
@@ -708,7 +710,16 @@ def main():
     def callback_get(update, context):
         print("callback")
         data_selected = int(update.callback_query.data)
-        if data_selected == 1:
+        if data_selected == 0:
+            print("준비중")
+            def get_message(update, context):
+                update.message.reply_text("got text")
+                update.message.reply_text(update.message.text)
+
+            # 메세지 핸들러
+            message_handler = MessageHandler(Filters.text, get_message)
+            updater.dispatcher.add_handler(message_handler)
+        elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
