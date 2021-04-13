@@ -20,7 +20,6 @@ from bs4 import BeautifulSoup
 #from urllib.parse import urlparse
 import urllib.parse as urlparse
 import urllib.request
-import telepot
 
 from requests import get  # to make GET request
 
