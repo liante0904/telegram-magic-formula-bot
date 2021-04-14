@@ -49,7 +49,7 @@ from telegram.ext import Updater, CallbackQueryHandler, CommandHandler, MessageH
 ############공용 상수############
 # 선택 아이템
 SELECT_ITEM = (
-    "준비중",               # 0
+    "스크리닝 직접 입력모드",               # 0
     "마법공식",             # 1
     "상상인증권",           # 2
     "하나금융투자",          # 3
@@ -59,10 +59,6 @@ SELECT_ITEM = (
 )
 # 메시지 발송 ID
 CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-# CHAT_ID = '-1001474652718' # 테스트 채널
-# CHAT_ID = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-# CHAT_ID = '-1001150510299' # 네이버 많이본 뉴스 채널
-# CHAT_ID = '-1001472616534' # 아이투자
 
 # BOT_API
 BOT_API = "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
@@ -79,28 +75,14 @@ cursor  = ''
 
 # 연속키URL
 NXT_KEY = ''
-# 텔레그램 채널 발송 여부
-SEND_YN = ''
-# 첫번째URL 
-FIRST_ARTICLE_URL = ''
-
-# LOOP 인덱스 변수
-SEC_FIRM_ORDER = 0 # 증권사 순번
-ARTICLE_BOARD_ORDER = 0 # 게시판 순번
 
 # 이모지
 EMOJI_FIRE = u'\U0001F525'
 EMOJI_PICK = u'\U0001F449'
 
-# 연속키용 상수
-FIRST_ARTICLE_INDEX = 0
-
-# 메세지 전송용 레포트 제목(말줄임표 사용 증권사)
-LIST_ARTICLE_TITLE = ''
-
 # JSON API 타입
-def NAVERNews_parse():
-    global NXT_KEY
+def MagicFormula_crowling(*args):
+
 
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
@@ -119,6 +101,18 @@ def NAVERNews_parse():
     # workDT = DATE_SPLIT[0] + DATE_SPLIT[1] + DATE_SPLIT[2]
 
     TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
+
+
+    try:
+        if args[0] == 0:
+            print("0번모드")
+            TARGET_URL = str(args[1]).strip()
+        elif args[0] == 1:
+            print("1번모드")
+            TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
+    except IndexError:
+        TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
+    
 
     request = urllib.request.Request(TARGET_URL)
     #검색 요청 및 처리
@@ -169,57 +163,11 @@ def NAVERNews_parse():
         TARGET_URL = TARGET_URL.replace('currentPage='+ str(idx), 'currentPage='+ str(idx+1)  )
         
     file.close()                     # 파일 객체 닫기
+
     sendDocument()
 
-    return
-    FIRST_ARTICLE_TITLE = jres['newsList'][0]['tit'].strip()
-    print('FIRST_ARTICLE_TITLE:',FIRST_ARTICLE_TITLE)
+    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
 
-    # 연속키 데이터베이스화 작업
-    # 연속키 데이터 저장 여부 확인 구간
-    dbResult = DB_SelNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER)
-    if dbResult: # 1
-        # 연속키가 존재하는 경우
-        print('데이터베이스에 연속키가 존재합니다. ','(네이버 뉴스)')
-
-    else: # 0
-        # 연속키가 존재하지 않는 경우 => 첫번째 게시물 연속키 정보 데이터 베이스 저장
-        print('데이터베이스에 ', '(네이버 뉴스)')
-        NXT_KEY = DB_InsNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_ARTICLE_TITLE)
-
-    # NaverNews 게시판에 따른 URL 지정
-    if ARTICLE_BOARD_ORDER == 0:category = 'flashnews'
-    else:                      category = 'ranknews'
-
-    nNewArticleCnt = 0
-    sendMessageText = ''
-    # JSON To List
-    for news in jres['newsList']:
-        LIST_ARTICLE_URL = 'https://m.stock.naver.com/news/read.nhn?category='+ category + '&officeId=' + news['oid'] + '&articleId=' + news['aid']
-        LIST_ARTICLE_TITLE = news['tit'].strip()
-
-        if ( NXT_KEY != LIST_ARTICLE_TITLE or NXT_KEY == '' ) and SEND_YN == 'Y':
-            nNewArticleCnt += 1 # 새로운 게시글 수
-            if len(sendMessageText) < 3500:
-                sendMessageText += GetSendMessageText(INDEX = nNewArticleCnt ,ARTICLE_BOARD_NAME = '',ARTICLE_TITLE = LIST_ARTICLE_TITLE, ARTICLE_URL = LIST_ARTICLE_URL)
-                print(len(sendMessageText))
-            else:
-                print("발송 게시물이 남았지만 최대 길이로 인해 중간 발송처리합니다.")
-                sendText(sendMessageText)
-                nNewArticleCnt = 0
-
-        elif SEND_YN == 'N':
-            print('###점검중 확인요망###')
-        else:
-            if nNewArticleCnt == 0:
-                print('새로운 게시물을 모두 발송하였습니다.')
-            else:
-                sendText(sendMessageText)
-
-            DB_UpdNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_ARTICLE_TITLE)
-            return True
-
-    DB_UpdNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_ARTICLE_TITLE) # 뉴스의 경우 연속 데이터가 다음 페이지로 넘어갈 경우 처리
     return True
 
 def NAVERNews_downloadFile(LIST_ARTICLE_URL, LIST_ATTACT_FILE_NAME):
@@ -230,89 +178,6 @@ def NAVERNews_downloadFile(LIST_ARTICLE_URL, LIST_ATTACT_FILE_NAME):
     time.sleep(5) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
     return True
 
-
-
-# 최초 send함수
-# URL(프리뷰해제) 발송 + 해당 레포트 pdf 발송
-def send(ARTICLE_BOARD_NAME , ARTICLE_TITLE , ARTICLE_URL): # 파일의 경우 전역변수로 처리 (downloadFile 함수)
-    global CHAT_ID
-
-    print('send()')
-    DISABLE_WEB_PAGE_PREVIEW = True # 메시지 프리뷰 여부 기본값 설정
-
-    # 실제 전송할 메시지 작성
-    sendMessageText = ''
-    sendMessageText += GetSendMessageTitle(ARTICLE_TITLE)
-    sendMessageText += ARTICLE_TITLE + "\n"
-    sendMessageText += EMOJI_PICK + ARTICLE_URL 
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
-    bot = telegram.Bot(token = my_token_key)
-
-    #생성한 텔레그램 봇 정보 출력
-    #me = bot.getMe()
-    #print('텔레그램 채널 정보 :',me)
-
-    if SEC_FIRM_ORDER == 999 or SEC_FIRM_ORDER == 998 or SEC_FIRM_ORDER == 997 : # 매매동향의 경우 URL만 발송하여 프리뷰 처리 
-        DISABLE_WEB_PAGE_PREVIEW = False
-
-
-    # if SEC_FIRM_ORDER == 998:
-    #     if  ARTICLE_BOARD_ORDER == 0 : 
-    #         CHAT_ID = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-    #     else:
-    #         CHAT_ID = '-1001150510299' # 네이버 많이본 뉴스 채널
-    # elif SEC_FIRM_ORDER == 997:
-    #         CHAT_ID = '-1001472616534' # 아이투자
-    # else:
-    #     CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-
-    bot.sendMessage(chat_id = GetSendChatId(), text = sendMessageText, disable_web_page_preview = DISABLE_WEB_PAGE_PREVIEW)
-
-    if DISABLE_WEB_PAGE_PREVIEW: # 첨부파일이 있는 경우 => 프리뷰는 사용하지 않음
-        try:
-            time.sleep(1) # 메시지 전송 텀을 두어 푸시를 겹치지 않게 함
-            bot.sendDocument(chat_id = GetSendChatId(), document = open(ATTACH_FILE_NAME, 'rb'))
-            os.remove(ATTACH_FILE_NAME) # 파일 전송 후 PDF 삭제
-        except:
-            return
-    
-    time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
-
-# URL 발신용 전용 함수 : ex) 네이버 뉴스
-def sendURL(ARTICLE_BOARD_NAME , ARTICLE_TITLE , ARTICLE_URL): # 파일의 경우 전역변수로 처리 (downloadFile 함수)
-    global CHAT_ID
-
-    print('sendURL()')
-
-    # 실제 전송할 메시지 작성
-    sendMessageText = ''
-    sendMessageText += GetSendMessageTitle(ARTICLE_TITLE)
-    sendMessageText += ARTICLE_TITLE + "\n"
-    sendMessageText += EMOJI_PICK + ARTICLE_URL 
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
-    bot = telegram.Bot(token = my_token_key)
-
-    #생성한 텔레그램 봇 정보 출력
-    #me = bot.getMe()
-    #print('텔레그램 채널 정보 :',me)
-
-    # if SEC_FIRM_ORDER == 998:
-    #     if  ARTICLE_BOARD_ORDER == 0 : 
-    #         CHAT_ID = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-    #     else:
-    #         CHAT_ID = '-1001150510299' # 네이버 많이본 뉴스 채널
-    # elif SEC_FIRM_ORDER == 997:
-    #         CHAT_ID = '-1001472616534' # 아이투자
-    # else:
-    #     CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-
-    bot.sendMessage(chat_id = GetSendChatId(), text = sendMessageText)
-    
-    time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
 def sendPhoto(ARTICLE_URL): # 파일의 경우 전역변수로 처리 (downloadFile 함수)
     print('sendPhoto()')
@@ -361,19 +226,11 @@ def sendDocument(): # 가공없이 텍스트를 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
-    # if SEC_FIRM_ORDER == 998:
-    #     if  ARTICLE_BOARD_ORDER == 0 : 
-    #         CHAT_ID = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-    #     else:
-    #         CHAT_ID = '-1001150510299' # 네이버 많이본 뉴스 채널
-    # elif SEC_FIRM_ORDER == 997:
-    #         CHAT_ID = '-1001472616534' # 아이투자
-    # else:
-    #     CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
     bot.sendDocument(chat_id = CHAT_ID, document =  open('hello.txt', 'rb'))
+
     # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
-    time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
+
 # URL에 파일명을 사용할때 한글이 포함된 경우 인코딩처리 로직 추가 
 def DownloadFile(URL, FILE_NAME):
     global ATTACH_FILE_NAME
@@ -463,55 +320,8 @@ def GetSendChatId():
     
     return SendMessageChatId
 
-def MySQL_Open_Connect():
-    global conn
-    global cursor
-    
-    # clearDB 
-    # url = urlparse.urlparse(os.environ['CLEARDB_DATABASE_URL'])
-    url = urlparse.urlparse('mysql://b0464b22432146:290edeca@us-cdbr-east-03.cleardb.com/heroku_31ee6b0421e7ff9?reconnect=true')
-    conn = pymysql.connect(host=url.hostname, user=url.username, password=url.password, charset='utf8', db=url.path.replace('/', ''), cursorclass=pymysql.cursors.DictCursor, autocommit=True)
-    cursor = conn.cursor()
-    return cursor
 
-def DB_SelNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER):
-    global NXT_KEY
-    global SEND_YN
-    global conn
-    global cursor
 
-    cursor = MySQL_Open_Connect()
-    dbQuery = "SELECT * FROM NXT_KEY WHERE 1=1 AND  SEC_FIRM_ORDER = %s   AND ARTICLE_BOARD_ORDER = %s "
-    dbResult = cursor.execute(dbQuery, (SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER))
-    rows = cursor.fetchall()
-    for row in rows:
-        print('####DB조회된 연속키####', end='\n')
-        print('SEC_FIRM_ORDER',row['SEC_FIRM_ORDER'], 'ARTICLE_BOARD_ORDER',row['ARTICLE_BOARD_ORDER'], 'NXT_KEY',row['NXT_KEY'])
-        NXT_KEY = row['NXT_KEY']
-        SEND_YN = row['SEND_YN']
-    conn.close()
-    return dbResult
-
-def DB_InsNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_NXT_KEY):
-    global NXT_KEY
-    global conn
-    global cursor
-    cursor = MySQL_Open_Connect()
-    dbQuery = "INSERT INTO NXT_KEY (SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, NXT_KEY)VALUES ( %s, %s, %s);"
-    cursor.execute(dbQuery, ( SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_NXT_KEY ))
-    NXT_KEY = FIRST_NXT_KEY
-    conn.close()
-    return NXT_KEY
-
-def DB_UpdNxtKey(SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER, FIRST_NXT_KEY):
-    global NXT_KEY
-    cursor = MySQL_Open_Connect()
-    dbQuery = "UPDATE NXT_KEY SET NXT_KEY = %s WHERE 1=1 AND  SEC_FIRM_ORDER = %s   AND ARTICLE_BOARD_ORDER = %s;"
-    dbResult = cursor.execute(dbQuery, ( FIRST_NXT_KEY, SEC_FIRM_ORDER, ARTICLE_BOARD_ORDER ))
-    if dbResult:
-        NXT_KEY = FIRST_NXT_KEY
-    conn.close()
-    return dbResult
 
 
 def fnguide_parse(*args):
@@ -635,6 +445,7 @@ def GetCurrentDate(*args):
 
 def main():
     global CHAT_ID
+    data_selected = 0
     print('########Program Start Run########')
 
 
@@ -650,33 +461,15 @@ def main():
         chat_id = '183792411'
         CHAT_ID = '183792411'
     
-    bot.sendMessage(chat_id=chat_id, text='/start 를 눌러 시작해보세요 ')
+    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
 
     updater = Updater( token=BOT_TOKEN, use_context=True )
     # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
 
-    def cmd_task_buttons(update, context):
-        task_buttons = [[
-            InlineKeyboardButton( '1.네이버 뉴스', callback_data=1 )
-            , InlineKeyboardButton( '2.직방 매물', callback_data=2 )
-        ], 
-        [
-            InlineKeyboardButton( '3.취소', callback_data=3 )
-        ]]
-        
-        reply_markup = InlineKeyboardMarkup( task_buttons )
-        
-        context.bot.send_message(
-            chat_id=update.message.chat_id
-            , text='작업을 선택해주세요.'
-            , reply_markup=reply_markup
-        )
-
-
     def start(update, context):
         task_buttons =  [
-            [ InlineKeyboardButton( '마법공식 입력모드', callback_data=0 ) ],
+            [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
             [ InlineKeyboardButton( '1.마법공식 종목받기', callback_data=1 ), InlineKeyboardButton( '2.준비중', callback_data=2 ) ], 
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
@@ -689,49 +482,59 @@ def main():
             , reply_markup=reply_markup
         )
     
-    def stop(update, context):
-        context.bot.send_message(chat_id=update.effective_chat.id, text="작업을 중단합니다.")
-    
-    def zigbang(update, context):
-        # context.bot.send_message(chat_id=update.effective_chat.id, text="[{}] 주변 매물을 수집합니다.".format( context.args[0] ))
-        context.bot.send_message(chat_id=update.effective_chat.id, text=" 주변 매물을 수집합니다.")
-    
+
     start_handler = CommandHandler('start', start)
-    stop_handler = CommandHandler('stop', stop)
-    zigbang_handler = CommandHandler('zigbang', zigbang)
-    task_buttons_handler = CommandHandler( 'tasks', cmd_task_buttons )  
-    
+    # stop_handler = CommandHandler('stop', stop)
+    # zigbang_handler = CommandHandler('zigbang', zigbang)
     
     dispatcher.add_handler(start_handler)
-    dispatcher.add_handler(stop_handler)
-    dispatcher.add_handler(zigbang_handler)
-    dispatcher.add_handler( task_buttons_handler )
+    # dispatcher.add_handler(stop_handler)
+    # dispatcher.add_handler(zigbang_handler)
+
 
     def callback_get(update, context):
         print("callback")
         data_selected = int(update.callback_query.data)
+        print(data_selected)
         if data_selected == 0:
-            print("준비중")
-            def get_message(update, context):
-                update.message.reply_text("got text")
-                update.message.reply_text(update.message.text)
+            # 스크리닝 공식 받기
+            context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
+                                        chat_id=update.callback_query.message.chat_id,
+                                        message_id=update.callback_query.message.message_id)
+            bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')    
+            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요. \n " + "가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')    
 
-            # 메세지 핸들러
-            message_handler = MessageHandler(Filters.text, get_message)
-            updater.dispatcher.add_handler(message_handler)
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
-            NAVERNews_parse()
+            MagicFormula_crowling(1)
         else:
+            return 
             print("준비중")
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[0]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
         
-
     updater.dispatcher.add_handler(CallbackQueryHandler(callback_get))
+
+
+    def get_screening_url(update, context):
+        if data_selected == 0:
+            inputURL = update.message.text
+            # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            # update.message.reply_text("가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')
+            # URL 형태가 아닌 경우 다시 입력을 받을 수 있는지 여부 확인
+            if 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp' not in inputURL:
+                bot.sendMessage(chat_id=chat_id, text="입력 값이 올바르지 않습니다. 다시 입력하세요.")
+            bot.sendMessage(chat_id=chat_id, text="입력 받은 조건으로 집계를 시작합니다. ")
+            URL = update.message.text
+            MagicFormula_crowling(0, URL)
+
+    if data_selected == 0:
+        message_handler = MessageHandler(Filters.text, get_screening_url)
+        updater.dispatcher.add_handler(message_handler)
+
     updater.start_polling()
     updater.idle()
 
