@@ -484,12 +484,8 @@ def main():
     
 
     start_handler = CommandHandler('start', start)
-    # stop_handler = CommandHandler('stop', stop)
-    # zigbang_handler = CommandHandler('zigbang', zigbang)
     
     dispatcher.add_handler(start_handler)
-    # dispatcher.add_handler(stop_handler)
-    # dispatcher.add_handler(zigbang_handler)
 
 
     def callback_get(update, context):
