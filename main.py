@@ -165,8 +165,7 @@ def MagicFormula_crowling(*args):
     file.close()                     # 파일 객체 닫기
 
     sendDocument()
-
-    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
+    sendText('/start 를 눌러 시작해보세요.')
 
     return True
 
@@ -211,7 +210,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     # else:
     #     CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
 
-    bot.sendMessage(chat_id = GetSendChatId(), text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    bot.sendMessage(chat_id = CHAT_ID(), text = sendMessageText )# , disable_web_page_preview = True, parse_mode = "Markdown")
     
     time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
