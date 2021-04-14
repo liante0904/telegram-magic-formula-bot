@@ -498,7 +498,7 @@ def main():
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')    
-            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요. \n " + "가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')    
+            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")    
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
