@@ -200,17 +200,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
-    # if SEC_FIRM_ORDER == 998:
-    #     if  ARTICLE_BOARD_ORDER == 0 : 
-    #         CHAT_ID = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-    #     else:
-    #         CHAT_ID = '-1001150510299' # 네이버 많이본 뉴스 채널
-    # elif SEC_FIRM_ORDER == 997:
-    #         CHAT_ID = '-1001472616534' # 아이투자
-    # else:
-    #     CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-
-    bot.sendMessage(chat_id = CHAT_ID(), text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
     time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
