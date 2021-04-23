@@ -81,15 +81,15 @@ EMOJI_FIRE = u'\U0001F525'
 EMOJI_PICK = u'\U0001F449'
 
 # JSON API 타입
+# http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging 
+# 의 산출 정보를 이용하여 종목 스크리닝 상세 정보를 생성 
 def MagicFormula_crowling(*args):
-
-
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=4&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%226096%22%2C%22MAX_VAL%22%3A%22200000%22%2C%22Ogb%22%3A%223%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%223%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2241.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22S%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-1635%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%223%22%7D%5D'
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%22100000.00%22%2C%22MAX_VAL%22%3A%22500000.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2230.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%5D'
-    # print('구간')    
     # print(GetCurrentDate\('YYYYMMDD'))
+
 
 
     today = date.today()
@@ -112,13 +112,21 @@ def MagicFormula_crowling(*args):
             TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
     except IndexError:
         TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
-    
+
+
+    workDt = str(args[1]).strip().find("&workDT=")
+    if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
+    else: 
+        userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+        TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+
+            
 
     request = urllib.request.Request(TARGET_URL)
     #검색 요청 및 처리
     response = urllib.request.urlopen(request)
     rescode = response.getcode()
-    if rescode != 200 :return print("네이버 뉴스 접속이 원활하지 않습니다 ")
+    if rescode != 200 :return sendText("(http://wise.thewm.co.kr)사이트 접속이 원활하지 않습니다. 잠시후 다시 시도해주세요.")
 
     CMP_PAGE_CNT = 10
     jres = json.loads(response.read().decode('utf-8'))
@@ -131,7 +139,8 @@ def MagicFormula_crowling(*args):
     print(TOTAL_PAGE_CNT)
     print("VAL 값은 우측 상단의 값임")
     print("반복코드는 나중에")
-    
+
+    sendText("스크리닝 종목수는 "+ TOTAL_CMP_CNT+ " 개 입니다. \n 전체 산출시간은 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
     file = open('hello.txt', 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
     
     
@@ -437,7 +446,6 @@ def main():
     data_selected = 0
     print('########Program Start Run########')
 
-
     BOT_TOKEN='672768316:AAHXpYmnMzGp_eH0i-juikUFU6q9y78CBhA'
     BOT_TOKEN= "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
     
@@ -511,7 +519,11 @@ def main():
             # update.message.reply_text("가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')
             # URL 형태가 아닌 경우 다시 입력을 받을 수 있는지 여부 확인
             if 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp' not in inputURL:
-                bot.sendMessage(chat_id=chat_id, text="입력 값이 올바르지 않습니다. 다시 입력하세요.")
+                bot.sendMessage(chat_id=chat_id, text="스크리닝 URL 타입이 올바르지 않습니다. 확인해주세요.")
+
+            if inputURL.find("&workDT=") < 0 :
+                bot.sendMessage(chat_id=chat_id, text="스크리닝 URL을 재생성 해주세요.")
+
             bot.sendMessage(chat_id=chat_id, text="입력 받은 조건으로 집계를 시작합니다. ")
             URL = update.message.text
             MagicFormula_crowling(0, URL)
