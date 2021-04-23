@@ -140,7 +140,7 @@ def MagicFormula_crowling(*args):
     print("VAL 값은 우측 상단의 값임")
     print("반복코드는 나중에")
 
-    sendText("스크리닝 종목수는 "+ TOTAL_CMP_CNT+ " 개 입니다. \n 전체 산출시간은 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
+    sendText("스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
     file = open('hello.txt', 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
     
     
