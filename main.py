@@ -459,6 +459,7 @@ def main():
         CHAT_ID = bot.getUpdates()[-1].message.chat.id
         print(chat_id)
     except IndexError:
+        pass
         chat_id = '183792411'
         CHAT_ID = '183792411'
     
