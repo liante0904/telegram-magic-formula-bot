@@ -63,18 +63,9 @@ CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 
 # BOT_API
 BOT_API = "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
 
-# DATABASE
-CLEARDB_DATABASE_URL = 'mysql://b0464b22432146:290edeca@us-cdbr-east-03.cleardb.com/heroku_31ee6b0421e7ff9?reconnect=true'
-
-# 게시글 갱신 시간
-REFRESH_TIME = 600
-
 # pymysql 변수
 conn    = ''
 cursor  = ''
-
-# 연속키URL
-NXT_KEY = ''
 
 # 이모지
 EMOJI_FIRE = u'\U0001F525'
@@ -89,8 +80,6 @@ def MagicFormula_crowling(*args):
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=4&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%226096%22%2C%22MAX_VAL%22%3A%22200000%22%2C%22Ogb%22%3A%223%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%223%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2241.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22S%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-1635%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%223%22%7D%5D'
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%22100000.00%22%2C%22MAX_VAL%22%3A%22500000.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2230.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%5D'
     # print(GetCurrentDate\('YYYYMMDD'))
-
-
 
     today = date.today()
     yesterday = date.today() - timedelta(1)
@@ -120,8 +109,8 @@ def MagicFormula_crowling(*args):
         userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
         TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
 
-            
-
+    print('###URL 확인###')
+    print(TARGET_URL)
     request = urllib.request.Request(TARGET_URL)
     #검색 요청 및 처리
     response = urllib.request.urlopen(request)
@@ -130,8 +119,24 @@ def MagicFormula_crowling(*args):
 
     CMP_PAGE_CNT = 10
     jres = json.loads(response.read().decode('utf-8'))
-    #print(jres)
-    TOTAL_CMP_CNT = jres['sAllCnt']
+    print(jres)
+    try:
+        TOTAL_CMP_CNT = jres['sAllCnt']
+    except KeyError: # While문으로 처리하기 (임시조치 )
+        falseWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+        yesterday = yesterday - timedelta(1)
+        TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+        request = urllib.request.Request(TARGET_URL)
+        #검색 요청 및 처리
+        response = urllib.request.urlopen(request)
+        rescode = response.getcode()
+        if rescode != 200 :return sendText("(http://wise.thewm.co.kr)사이트 접속이 원활하지 않습니다. 잠시후 다시 시도해주세요.")
+
+        CMP_PAGE_CNT = 10
+        jres = json.loads(response.read().decode('utf-8'))
+        TOTAL_CMP_CNT = jres['sAllCnt']
+
+
     TOTAL_PAGE_CNT = math.ceil(TOTAL_CMP_CNT / CMP_PAGE_CNT) # 페이지 수 이므로 정수가 아닌 경우 +1
     
     print('한 페이지에 회사 수는', CMP_PAGE_CNT , "건 입니다.")
@@ -142,7 +147,7 @@ def MagicFormula_crowling(*args):
 
     sendText("스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
     file = open('hello.txt', 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
-    
+
     
     NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
     jres = jres['resultList']
@@ -323,7 +328,6 @@ def GetSendChatId():
 
 
 def fnguide_parse(*args):
-    global NXT_KEY
     global LIST_ARTICLE_TITLE
 
     pattern = ''
