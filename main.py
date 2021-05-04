@@ -71,10 +71,13 @@ cursor  = ''
 EMOJI_FIRE = u'\U0001F525'
 EMOJI_PICK = u'\U0001F449'
 
+strFileName = ''
+
 # JSON API 타입
 # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging 
 # 의 산출 정보를 이용하여 종목 스크리닝 상세 정보를 생성 
 def MagicFormula_crowling(*args):
+    global strFileName
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=4&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%226096%22%2C%22MAX_VAL%22%3A%22200000%22%2C%22Ogb%22%3A%223%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%223%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2241.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22S%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-1635%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%223%22%7D%5D'
@@ -151,7 +154,8 @@ def MagicFormula_crowling(*args):
     print("반복코드는 나중에")
 
     sendText("스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
-    file = open(str(today)+'.txt', 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
+    strFileName = str(today)+'.txt'
+    file = open( strFileName, 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
 
     
     NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
@@ -234,7 +238,7 @@ def sendDocument(): # 가공없이 텍스트를 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
-    bot.sendDocument(chat_id = CHAT_ID, document =  open('hello.txt', 'rb'))
+    bot.sendDocument(chat_id = CHAT_ID, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
