@@ -511,7 +511,10 @@ def main():
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
-            MagicFormula_crowling(1)
+            try:                                      
+                MagicFormula_crowling(1)
+            except:
+                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.") 
         else:
             return 
             print("준비중")
@@ -536,7 +539,11 @@ def main():
 
             bot.sendMessage(chat_id=chat_id, text="입력 받은 조건으로 집계를 시작합니다. ")
             URL = update.message.text
-            MagicFormula_crowling(0, URL)
+            try:
+                MagicFormula_crowling(0, URL)
+            except:
+                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.")                
+
 
     if data_selected == 0:
         message_handler = MessageHandler(Filters.text, get_screening_url)
