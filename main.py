@@ -110,7 +110,7 @@ def MagicFormula_crowling(*args):
     
     if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
     else: 
-        if args[0] == 1:
+        if args[0] == 0:
             userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
             TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
 
