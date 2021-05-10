@@ -59,7 +59,8 @@ SELECT_ITEM = (
 )
 # 메시지 발송 ID
 CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-
+# 퀀트 URL 변수
+TARGET_URL = ''
 # BOT_API
 BOT_API = "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
 
@@ -73,11 +74,14 @@ EMOJI_PICK = u'\U0001F449'
 
 strFileName = ''
 
+
+NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 # JSON API 타입
 # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging 
 # 의 산출 정보를 이용하여 종목 스크리닝 상세 정보를 생성 
 def MagicFormula_crowling(*args):
     global strFileName
+    global TARGET_URL
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=4&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%226096%22%2C%22MAX_VAL%22%3A%22200000%22%2C%22Ogb%22%3A%223%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%223%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2241.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22S%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-1635%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%223%22%7D%5D'
@@ -94,7 +98,7 @@ def MagicFormula_crowling(*args):
 
     TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
-
+    TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210504&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%220.50%22%2C%22MAX_VAL%22%3A%2215.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%5D'
     try:
         if args[0] == 0:
             print("0번모드 사용자 입력모드")
@@ -158,8 +162,11 @@ def MagicFormula_crowling(*args):
     file = open( strFileName, 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
 
     
-    NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
-    jres = jres['resultList']
+    try:
+        jres = jres['resultList']
+    except:
+        print("스크리닝 리스트를 받아오지 못함 + 서버가 정상이라 가정하고 workdt 공휴일 보정처리")
+
     for idx in range(1, TOTAL_PAGE_CNT+1):
         paging = 'currentPage='
         paging += str(idx)
@@ -333,6 +340,21 @@ def GetSendChatId():
     return SendMessageChatId
 
 
+def GetWorkDt(*args):
+    global TARGET_URL
+    SendMessageChatId = 0
+    if SEC_FIRM_ORDER == 998:
+        if  ARTICLE_BOARD_ORDER == 0 : 
+            SendMessageChatId = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
+        else:
+            SendMessageChatId = '-1001150510299' # 네이버 많이본 뉴스 채널
+    elif SEC_FIRM_ORDER == 997:
+            SendMessageChatId = '-1001472616534' # 아이투자
+    else:
+        SendMessageChatId = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
+    
+    return SendMessageChatId
+
 
 
 
@@ -481,7 +503,8 @@ def main():
     def start(update, context):
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
-            [ InlineKeyboardButton( '1.마법공식 종목받기', callback_data=1 ), InlineKeyboardButton( '2.준비중', callback_data=2 ) ], 
+            [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 15배 이내, 배당 수익률1%↑, ROE 10%↑ (PER오름차순)', callback_data=1 ) ],
+            [ InlineKeyboardButton( '2.준비중', callback_data=2 ) ] ,
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
         
