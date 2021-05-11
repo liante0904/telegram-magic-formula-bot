@@ -98,7 +98,7 @@ def MagicFormula_crowling(*args):
 
     TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
-    TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210504&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%220.50%22%2C%22MAX_VAL%22%3A%2215.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%5D'
+    #TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210504&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%220.50%22%2C%22MAX_VAL%22%3A%2215.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%5D'
     try:
         if args[0] == 0:
             print("0번모드 사용자 입력모드")
@@ -157,7 +157,7 @@ def MagicFormula_crowling(*args):
     print("VAL 값은 우측 상단의 값임")
     print("반복코드는 나중에")
 
-    sendText("스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
+    sendText("입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
     strFileName = str(today)+'.txt'
     file = open( strFileName, 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
 
@@ -563,9 +563,9 @@ def main():
 
             if inputURL.find("&workDT=") < 0 :
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 URL을 재생성 해주세요.")
-
-            bot.sendMessage(chat_id=chat_id, text="입력 받은 조건으로 집계를 시작합니다. ")
+            
             URL = update.message.text
+
             try:
                 MagicFormula_crowling(0, URL)
             except:
