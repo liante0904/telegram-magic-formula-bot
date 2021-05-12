@@ -27,6 +27,11 @@ from requests import get  # to make GET request
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CallbackQueryHandler, CommandHandler, MessageHandler , Filters
 
+# 타임존 설정
+# 한국(서울) 기준
+datetime.datetime.now(timezone('Asia/Seoul'))
+# UTC
+datetime.datetime.now(timezone('UTC'))
 
 # 참고 문서
 # https://heodolf.tistory.com/75
@@ -87,6 +92,7 @@ def MagicFormula_crowling(*args):
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=4&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%226096%22%2C%22MAX_VAL%22%3A%22200000%22%2C%22Ogb%22%3A%223%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%223%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2241.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22S%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-1635%22%2C%22MAX_VAL%22%3A%22100.00%22%2C%22Ogb%22%3A%223%22%7D%5D'
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210305&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22I%22%2C%22SEQ%22%3A%222%22%2C%22MIN_VAL%22%3A%22100000.00%22%2C%22MAX_VAL%22%3A%22500000.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%2230.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2250.00%22%2C%22Ogb%22%3A%221%22%7D%5D'
     # print(GetCurrentDate\('YYYYMMDD'))
+
 
     today = date.today()
     yesterday = date.today() - timedelta(1)
@@ -538,6 +544,8 @@ def main():
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
+            MagicFormula_crowling(1)
+            return                                        
             try:                                      
                 MagicFormula_crowling(1)
             except:
@@ -565,7 +573,8 @@ def main():
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 URL을 재생성 해주세요.")
             
             URL = update.message.text
-
+            MagicFormula_crowling(0, URL)
+            return
             try:
                 MagicFormula_crowling(0, URL)
             except:
