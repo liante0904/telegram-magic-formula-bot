@@ -504,7 +504,7 @@ def main():
     def start(update, context):
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
-            [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 15배 이내, 배당 수익률1%↑, ROE 10%↑ (PER오름차순)', callback_data=1 ) ],
+            [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
             [ InlineKeyboardButton( '2.준비중', callback_data=2 ) ] ,
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
