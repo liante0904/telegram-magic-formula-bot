@@ -87,6 +87,8 @@ NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 def MagicFormula_crowling(*args):
     global strFileName
     global TARGET_URL
+    
+    DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210511&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
     # print(GetCurrentDate\('YYYYMMDD'))
@@ -98,29 +100,31 @@ def MagicFormula_crowling(*args):
 
     # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
-    TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210511&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
-
-    try:
+    print('전일:', yesterday.strftime('%Y%m%d'))
+    try: # 사용자의 입력값 받기 시도
         if args[0] == 0:
             print("0번모드 사용자 입력모드")
             TARGET_URL = str(args[1]).strip()
         elif args[0] == 1:
             print("1번모드")
-    except IndexError:
-        TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
+            TARGET_URL = DEFAULT_URL 
+    except IndexError: # 사용자가 입력한 입력값 없을때
+        print("스크리닝 URL에러로 기본값으로")
+        TARGET_URL = DEFAULT_URL
+        # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
 
     try:
-        workDt = str(args[1]).strip().find("&workDT=")
+        workDt = TARGET_URL.find("&workDT=")
     except IndexError:
-        if args[0] == 1:
-            workDt = 0 
+        return  
+
     
     if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
     else: 
         if args[0] == 0:
             userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
-            TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+            #TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
 
     print('###URL 확인###')
     print(TARGET_URL)
@@ -136,9 +140,8 @@ def MagicFormula_crowling(*args):
     try:
         TOTAL_CMP_CNT = jres['sAllCnt']
     except KeyError: # While문으로 처리하기 (임시조치 )
-        falseWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
-        yesterday = yesterday - timedelta(1)
-        TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+        userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+        TARGET_URL = TARGET_URL.strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
         request = urllib.request.Request(TARGET_URL)
         #검색 요청 및 처리
         response = urllib.request.urlopen(request)
