@@ -56,7 +56,7 @@ datetime.datetime.now(timezone('UTC'))
 SELECT_ITEM = (
     "스크리닝 직접 입력모드",               # 0
     "마법공식",             # 1
-    "상상인증권",           # 2
+    "마법공식 엑셀",           # 2
     "하나금융투자",          # 3
     "한양증권",              # 4
     "삼성증권",              # 5
@@ -79,6 +79,7 @@ EMOJI_PICK = u'\U0001F449'
 
 strFileName = ''
 
+data_selected = 0
 
 NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 # JSON API 타입
@@ -102,7 +103,8 @@ def MagicFormula_crowling(*args):
 
     print('전일:', yesterday.strftime('%Y%m%d'))
     try: # 사용자의 입력값 받기 시도
-        if args[0] == 0:
+        if args[0] == 0 or args[0] == 2:
+            print(args[0])
             print("0번모드 사용자 입력모드")
             TARGET_URL = str(args[1]).strip()
         elif args[0] == 1:
@@ -122,9 +124,8 @@ def MagicFormula_crowling(*args):
     
     if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
     else: 
-        if args[0] == 0:
+        if args[0]:
             userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
-            #TARGET_URL = str(args[1]).strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
 
     print('###URL 확인###')
     print(TARGET_URL)
@@ -165,7 +166,7 @@ def MagicFormula_crowling(*args):
     strFileName = str(today)+'.txt'
     file = open( strFileName, 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
 
-    
+    print(args[0] , '0이면 일반, 2면 엑셀임!')    
     try:
         jres = jres['resultList']
     except:
@@ -236,7 +237,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
 
     bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
-    time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
+    time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
 def sendDocument(): # 가공없이 텍스트를 발송합니다.
     global CHAT_ID
@@ -482,7 +483,8 @@ def GetCurrentDate(*args):
 
 def main():
     global CHAT_ID
-    data_selected = 0
+    global data_selected
+    
     print('########Program Start Run########')
 
     BOT_TOKEN='672768316:AAHXpYmnMzGp_eH0i-juikUFU6q9y78CBhA'
@@ -508,7 +510,7 @@ def main():
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
             [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
-            [ InlineKeyboardButton( '2.준비중', callback_data=2 ) ] ,
+            [ InlineKeyboardButton( '2.마법공식 엑셀', callback_data=2 ) ] ,
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
         
@@ -527,27 +529,29 @@ def main():
 
 
     def callback_get(update, context):
+        global data_selected
         print("callback")
         data_selected = int(update.callback_query.data)
         print(data_selected)
-        if data_selected == 0:
+        if data_selected == 0 or data_selected == 2:
             # 스크리닝 공식 받기
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
-            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")    
+            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             MagicFormula_crowling(1)
-            return                                        
+            '''
             try:                                      
                 MagicFormula_crowling(1)
             except:
-                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.") 
+                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.") '''
+                
         else:
             return 
             print("준비중")
@@ -559,7 +563,10 @@ def main():
 
 
     def get_screening_url(update, context):
-        if data_selected == 0:
+        print(update)
+        print(context)
+        print(data_selected)
+        if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
             # update.message.reply_text("가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')
@@ -571,7 +578,7 @@ def main():
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 URL을 재생성 해주세요.")
             
             URL = update.message.text
-            MagicFormula_crowling(0, URL)
+            MagicFormula_crowling(data_selected, URL)
             return
             try:
                 MagicFormula_crowling(0, URL)
@@ -579,7 +586,8 @@ def main():
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.")                
 
 
-    if data_selected == 0:
+    if data_selected == 0 or data_selected == 1 or data_selected == 2:
+        print('data_selected:',data_selected)
         message_handler = MessageHandler(Filters.text, get_screening_url)
         updater.dispatcher.add_handler(message_handler)
 
