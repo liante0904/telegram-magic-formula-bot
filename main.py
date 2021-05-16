@@ -434,7 +434,7 @@ def excel_write_row(*args):
     data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text
     data_price =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0]
     data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text
-    data_업종 = data_stxt1.strip().split(" ")[1]
+    data_업종 = " "#data_stxt1.strip().split(" ")[1]
     data_stxt2 = soup.select_one('#strMarketTxt').text
     data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
     data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text
