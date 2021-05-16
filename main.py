@@ -488,17 +488,17 @@ def excel_write_row(*args):
     
     write_ws.cell(nRowIdx, 2, data_업종)
     write_ws.cell(nRowIdx, 3, data_cmp_nm)
-    write_ws.cell(nRowIdx, 4, data_price)
-    write_ws.cell(nRowIdx, 5, data_Per)
-    write_ws.cell(nRowIdx, 6, data_Pbr)
-    write_ws.cell(nRowIdx, 7, data_Roe)
-    write_ws.cell(nRowIdx, 8, data_Dps)
-    write_ws.cell(nRowIdx, 9, data_Dpsyield)
-    write_ws.cell(nRowIdx, 10, data_매출액)
-    write_ws.cell(nRowIdx, 11, data_영업이익)
-    write_ws.cell(nRowIdx, 12, data_당기순이익)
-    write_ws.cell(nRowIdx, 13, data_시가총액)
-    write_ws.cell(nRowIdx, 14, data_자본총계)
+    write_ws.cell(nRowIdx, 4, data_price).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 5, data_Per).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 6, data_Pbr).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 7, data_Roe).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 8, data_Dps).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 9, data_Dpsyield).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 10, data_매출액).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 11, data_영업이익).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 12, data_당기순이익).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 13, data_시가총액).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 14, data_자본총계).number_format = '#,##0'
     write_ws.cell(nRowIdx, 15, data_거래소)
     
 
