@@ -62,6 +62,36 @@ SELECT_ITEM = (
     "삼성증권",              # 5
     "교보증권"              # 6
 )
+
+##### 엑셀 상수 #####
+# 엑셀파일 쓰기
+write_wb = Workbook()
+
+# 이름이 있는 시트를 생성
+write_ws = write_wb.create_sheet('Sheet1')
+
+# Sheet1에다 입력
+write_ws = write_wb.active
+# 엑셀출력 상수
+EXCEL_TITLE = (
+    "",               # 0
+    "섹터",             # 1
+    "종목명",           # 2
+    "주가",          # 3
+    "PER",              # 4
+    "PBR",              # 5
+    "ROE",              # 6
+    "DPS",              # 7
+    "DPS Yield",              # 8
+    "매출액(억원)",     #9
+    "영업이익(억원)",   #10
+    "당기순이익(억원)", #11
+    "시가총액(억원)",   #12
+    "자본총계(억원)",   #13
+    "거래소"            #14
+)
+
+
 # 메시지 발송 ID
 CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
 # 퀀트 URL 변수
@@ -88,14 +118,15 @@ NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 def MagicFormula_crowling(*args):
     global strFileName
     global TARGET_URL
+    global write_wb
     global data_selected
-    
-    DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210511&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
+
+    today = date.today()
+    yesterday = date.today() - timedelta(1)    
+    DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT='+ yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
     # print(GetCurrentDate\('YYYYMMDD'))
-    today = date.today()
-    yesterday = date.today() - timedelta(1)
 
     # print(today)
     # print(yesterday.strftime('%Y%m%d'))
@@ -120,7 +151,7 @@ def MagicFormula_crowling(*args):
     try:
         workDt = TARGET_URL.find("&workDT=")
     except IndexError:
-        return  
+        return  sendText("입력한 스크리닝URL이 올바르지 않습니다.")
 
     
     if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
@@ -164,7 +195,11 @@ def MagicFormula_crowling(*args):
     print("반복코드는 나중에")
 
     sendText("입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
+
     strFileName = str(today)+'.txt'
+    if data_selected == 0 or data_selected == 1: strFileName = str(today)+'.txt'
+    else: strFileName = str(today)+'.xlsx'
+    
     file = open( strFileName, 'w')    # hello.txt 파일을 쓰기 모드(w)로 열기. 파일 객체 반환
 
     print(args[0] , '0이면 일반, 2면 엑셀임!')    
@@ -173,7 +208,7 @@ def MagicFormula_crowling(*args):
     except:
         print("스크리닝 리스트를 받아오지 못함 + 서버가 정상이라 가정하고 workdt 공휴일 보정처리")
 
-    excel_write_title()
+    nRowIdx = 0
     for idx in range(1, TOTAL_PAGE_CNT+1):
         paging = 'currentPage='
         paging += str(idx)
@@ -189,27 +224,36 @@ def MagicFormula_crowling(*args):
         
         if data_selected == 0 or data_selected == 1:
             for r in jres:
+                
                 write = ''
                 write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
                 write += fnguide_parse(r['CMP_CD']) + '\n'
                 print(write)
                 file.write(write)      # 파일에 문자열 저장
-        else: ## 0, 2
+                nRowCnt=+1
+        else: ## 2
             for r in jres:
-                excel_write_title()
+                if nRowIdx == 0: excel_write_title()
+                else: excel_write_row(r['CMP_CD'], nRowIdx)
+                nRowIdx= nRowIdx + 1
+                
+                
                 # write = ''
                 # write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
                 # write += fnguide_parse(r['CMP_CD']) + '\n'
                 # print(write)
                 # file.write(write)      # 파일에 문자열 저장
+        
+        
             
         TARGET_URL = TARGET_URL.replace('currentPage='+ str(idx), 'currentPage='+ str(idx+1)  )
 
-    if data_selected == 1:
-        file.close()                     # 파일 객체 닫기
-        sendDocument()
-    else:
-        return
+    if data_selected == 0 or data_selected == 1:
+        file.close() # 파일 객체 닫기
+    elif data_selected == 2:
+        write_wb.save(strFileName)
+        
+    sendDocument() # txt, excel 발송 통합
     sendText('/start 를 눌러 시작해보세요.')
 
     return True
@@ -229,7 +273,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
-def sendDocument(): # 가공없이 텍스트를 발송합니다.
+def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     global CHAT_ID
 
     print('sendDocument()')
@@ -275,7 +319,6 @@ def GetWorkDt(*args):
     return SendMessageChatId
 
 def fnguide_parse(*args):
-    global LIST_ARTICLE_TITLE
 
     pattern = ''
     CODE = ''
@@ -316,9 +359,9 @@ def fnguide_parse(*args):
     return r
 
 def excel_write_title(*args):
-    # global write_wb
-    # global write_ws
     
+    # 타이틀
+
     # pattern = ''
     # CODE = ''
     # for pattern in args:
@@ -336,28 +379,136 @@ def excel_write_title(*args):
     #             write_ws.cell(1, 6, '시가배당')
 
 
-    # 엑셀파일 쓰기
-    write_wb = Workbook()
+    # # 엑셀파일 쓰기
+    # write_wb = Workbook()
 
-    # 이름이 있는 시트를 생성
-    write_ws = write_wb.create_sheet('생성시트')
+    # # 이름이 있는 시트를 생성
+    # write_ws = write_wb.create_sheet('Sheet1')
 
-    # Sheet1에다 입력
-    write_ws = write_wb.active
+    # # Sheet1에다 입력
+    # write_ws = write_wb.active
     # 타이틀
-    write_ws['A1'] = '숫자'
-    write_ws['B1'] = '종목명'
-
-    #행 단위로 추가
-    write_ws.append([1,2,3])
+    #write_ws['B1'] = '숫자'
+    #write_ws['B1'] = '종목명'
+    # write_ws.append([1,2,3])
+    for idx in range(1, len(EXCEL_TITLE)):
+        write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
 
     #셀 단위로 추가
-    write_ws.cell(5, 5, '5행5열')
-    write_wb.save("숫자.xlsx")
+    # write_ws.cell(5, 5, '5행5열')
+    # write_wb.save(strFileName)
 
     # 출처 https://myjamong.tistory.com/51
 
 
+def excel_write_row(*args):
+# EXCEL_TITLE = (
+#     "",               # 0
+#     "섹터",             # 1
+#     "종목명",           # 2
+#     "주가",          # 3
+#     "PER",              # 4
+#     "PBR",              # 5
+#     "ROE",              # 6
+#     "DPS",              # 7
+#     "DPS Yield",              # 8
+#     "매출액(억원)",     #9
+#     "영업이익(억원)",   #10
+#     "당기순이익(억원)", #11
+#     "시가총액(억원)",   #12
+#     "자본총계(억원)",   #13
+#     "거래소"            #14
+# )
+
+    strIsuNo = str(args[0])
+    nRowIdx  = int(args[1]) + 1 # 첫번째 레코드는 헤더를 쓰기 때문
+
+
+
+    TARGET_URL = 'http://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?MenuYn=Y&gicode='+ 'A'+ strIsuNo
+    webpage = requests.get(TARGET_URL, verify=False)
+
+    # HTML parse
+    soup = BeautifulSoup(webpage.content, "html.parser")
+    data_cmp_nm = soup.select_one('#giName').text
+    data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text
+    data_price =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0]
+    data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text
+    data_업종 = data_stxt1.strip().split(" ")[1]
+    data_stxt2 = soup.select_one('#strMarketTxt').text
+    data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
+    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text
+    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text
+    data_Dps = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(21) > td:nth-child(4)').text
+    data_Dpsyield = str( round(int(data_Dps.replace(",","")) / int(data_price.replace(",",""))  * 100 ,2) )  + '%'
+    data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text
+    data_매출액 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text
+    data_영업이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text
+    data_당기순이익= soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(4) > td:nth-child(4)').text
+    data_자본총계 = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(7) > td:nth-child(4)').text
+    data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text
+    data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
+    data_cmp_info = soup.select_one('#bizSummaryContent').text
+    data_거래소 = data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
+    #data_ROE = soup.select_one('#svdMainGrid10D > table > tbody > tr:nth-child(7) > td:nth-child(2)')#.text
+    # r = ''
+    # r += TARGET_URL + '\n'
+    # r += '==============================================================' + '\n'
+    # r += '종목명: ' + data_cmp_nm                                + '\n'
+    # r += '종목코드: ' + data_cmp_code                            + '\n'
+    # r += '업종: ' + data_stxt1                                      + '\t' + data_stxt2 + '\n'
+    # r += 'per(FY0): ' + data_Per                                      + '\n'
+    # r += '12m fwd per: ' + data_fwdPer                           + '\n'
+    # r += '시가배당 수익률 '  + data_dividendYield                + '\n'
+    # r += '기업개요:' + data_cmp_info                 + '\n'
+    # r += '==============================================================' + '\n'
+
+
+# EXCEL_TITLE = (
+#     "",               # 0
+#     "섹터",             # 1
+#     "종목명",           # 2
+#     "주가",          # 3
+#     "PER",              # 4
+#     "PBR",              # 5
+#     "ROE",              # 6
+#     "DPS",              # 7
+#     "시가배당률",              # 8
+#     "매출액(억원)",     #9
+#     "영업이익(억원)",   #10
+#     "당기순이익(억원)", #11
+#     "시가총액(억원)",   #12
+#     "자본총계(억원)",   #13
+#     "거래소"            #14
+# )
+    
+    print('nRowIdx:', nRowIdx, 'data_cmp_nm:', data_cmp_nm)
+    #print(data_stxt1[2])
+    
+    
+    write_ws.cell(nRowIdx, 2, data_업종)
+    write_ws.cell(nRowIdx, 3, data_cmp_nm)
+    write_ws.cell(nRowIdx, 4, data_price)
+    write_ws.cell(nRowIdx, 5, data_Per)
+    write_ws.cell(nRowIdx, 6, data_Pbr)
+    write_ws.cell(nRowIdx, 7, data_Roe)
+    write_ws.cell(nRowIdx, 8, data_Dps)
+    write_ws.cell(nRowIdx, 9, data_Dpsyield)
+    write_ws.cell(nRowIdx, 10, data_매출액)
+    write_ws.cell(nRowIdx, 11, data_영업이익)
+    write_ws.cell(nRowIdx, 12, data_당기순이익)
+    write_ws.cell(nRowIdx, 13, data_시가총액)
+    write_ws.cell(nRowIdx, 14, data_자본총계)
+    write_ws.cell(nRowIdx, 15, data_거래소)
+    
+
+    
+
+    #셀 단위로 추가
+    # write_ws.cell(5, 5, '5행5열')
+    #write_wb.save(strFileName)
+
+    # 출처 https://myjamong.tistory.com/51
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
     pattern = ''
@@ -474,9 +625,6 @@ def main():
 
 
     def get_screening_url(update, context):
-        print(update)
-        print(context)
-        print(data_selected)
         if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
