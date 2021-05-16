@@ -88,6 +88,7 @@ NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 def MagicFormula_crowling(*args):
     global strFileName
     global TARGET_URL
+    global data_selected
     
     DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=20210511&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
     # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
@@ -172,6 +173,7 @@ def MagicFormula_crowling(*args):
     except:
         print("스크리닝 리스트를 받아오지 못함 + 서버가 정상이라 가정하고 workdt 공휴일 보정처리")
 
+    excel_write_title()
     for idx in range(1, TOTAL_PAGE_CNT+1):
         paging = 'currentPage='
         paging += str(idx)
@@ -184,44 +186,32 @@ def MagicFormula_crowling(*args):
         if rescode != 200 :return print("네이버 뉴스 접속이 원활하지 않습니다 ")
         jres = json.loads(response.read().decode('utf-8'))
         jres = jres['resultList']
-        # print(idx)
         
-        for r in jres:
-            write = ''
-            write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
-            write += fnguide_parse(r['CMP_CD']) + '\n'
-            print(write)
-            file.write(write)      # 파일에 문자열 저장
+        if data_selected == 0 or data_selected == 1:
+            for r in jres:
+                write = ''
+                write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
+                write += fnguide_parse(r['CMP_CD']) + '\n'
+                print(write)
+                file.write(write)      # 파일에 문자열 저장
+        else: ## 0, 2
+            for r in jres:
+                excel_write_title()
+                # write = ''
+                # write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
+                # write += fnguide_parse(r['CMP_CD']) + '\n'
+                # print(write)
+                # file.write(write)      # 파일에 문자열 저장
             
-            
-        
         TARGET_URL = TARGET_URL.replace('currentPage='+ str(idx), 'currentPage='+ str(idx+1)  )
-        
-    file.close()                     # 파일 객체 닫기
 
-    sendDocument()
+    if data_selected == 1:
+        file.close()                     # 파일 객체 닫기
+        sendDocument()
+    else:
+        return
     sendText('/start 를 눌러 시작해보세요.')
 
-    return True
-
-def NAVERNews_downloadFile(LIST_ARTICLE_URL, LIST_ATTACT_FILE_NAME):
-    global ATTACH_FILE_NAME
-    ATTACH_FILE_NAME = LIST_ATTACT_FILE_NAME #BeautifulSoup(webpage.content, "html.parser").select_one('#contents > div > div.bbs_a_view > dl.b_bottom > dd > em:nth-child(1)> a').text.strip()
-    
-    DownloadFile(URL = LIST_ARTICLE_URL, FILE_NAME = ATTACH_FILE_NAME)
-    time.sleep(5) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
-    return True
-
-
-def sendPhoto(ARTICLE_URL): # 파일의 경우 전역변수로 처리 (downloadFile 함수)
-    print('sendPhoto()')
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
-    bot = telegram.Bot(token = my_token_key)
-
-    bot.sendPhoto(chat_id = GetSendChatId(), photo = ARTICLE_URL)
-    time.sleep(8) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
     return True
 
 def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
@@ -253,82 +243,6 @@ def sendDocument(): # 가공없이 텍스트를 발송합니다.
     bot.sendDocument(chat_id = CHAT_ID, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
-    
-
-# URL에 파일명을 사용할때 한글이 포함된 경우 인코딩처리 로직 추가 
-def DownloadFile(URL, FILE_NAME):
-    global ATTACH_FILE_NAME
-    print("DownloadFile()")
-
-    if SEC_FIRM_ORDER == 6: # 교보증권 예외 로직
-        # 로직 사유 : 레포트 첨부파일명에 한글이 포함된 경우 URL처리가 되어 있지 않음
-        CONVERT_URL = URL 
-        for c in URL: # URL내 한글이 있는 경우 인코딩 처리(URL에 파일명을 이용하여 조합함)
-            # 코드셋 기준 파이썬:UTF-8 . 교보증권:EUC-KR
-            # 1. 주소에서 한글 문자를 판별
-            # 2. 해당 문자를 EUC-KR로 변환후 URL 인코딩
-            print("##",c , "##", ord('가') <= ord(c) <= ord('힣') )
-            if ord('가') <= ord(c) <= ord('힣'): 
-                c_encode = c.encode('euc-kr')
-                CONVERT_URL = CONVERT_URL.replace(c, urlparse.quote(c_encode) )
-                print(CONVERT_URL)
-
-        if URL != CONVERT_URL: 
-            print("기존 URL에 한글이 포함되어 있어 인코딩처리함")
-            print("CONVERT_URL", CONVERT_URL)
-            URL = CONVERT_URL
-
-    ATTACH_FILE_NAME = re.sub('[\/:*?"<>|]','',FILE_NAME) # 저장할 파일명 : 파일명으로 사용할수 없는 문자 삭제 변환
-    print('convert URL:',URL)
-    print('convert ATTACH_FILE_NAME:',ATTACH_FILE_NAME)
-    with open(ATTACH_FILE_NAME, "wb")as file:  # open in binary mode
-        response = get(URL, verify=False)     # get request
-        file.write(response.content) # write to file
-        
-    return True
-
-def GetSendMessageText(INDEX, ARTICLE_BOARD_NAME , ARTICLE_TITLE , ARTICLE_URL):
-
-    # 실제 전송할 메시지 작성
-    sendMessageText = ''
-    # 발신 게시판 종류
-    if INDEX == 1:
-        sendMessageText += GetSendMessageTitle(ARTICLE_TITLE) + "\n"
-    # 게시글 제목(굵게)
-    sendMessageText += "**" + ARTICLE_TITLE + "**" + "\n"
-    # 원문 링크
-    sendMessageText += EMOJI_PICK  + "[원문링크(클릭)]" + "("+ ARTICLE_URL + ")"
-    sendMessageText += "\n" + "\n"
-
-    return sendMessageText
-
-def GetSendMessageTitle(ARTICLE_TITLE):
-
-    SendMessageTitle = ''
-    if SEC_FIRM_ORDER == 999:
-        msgFirmName = "매매동향"
-        ARTICLE_BOARD_NAME = ''
-        if  "최종치" in ARTICLE_TITLE:
-            print('sedaily의 매매동향 최종치 집계 데이터는 메시지 발송을 하지 않습니다.') # 장마감 최종치는 발송 안함
-            return 
-    elif SEC_FIRM_ORDER == 998:
-        msgFirmName = "네이버 - "
-        if  ARTICLE_BOARD_ORDER == 0 :
-            ARTICLE_BOARD_NAME = "실시간 뉴스 속보"
-        else:
-            ARTICLE_BOARD_NAME = "가장 많이 본 뉴스"
-    elif SEC_FIRM_ORDER == 997:
-        msgFirmName = "아이투자 - "
-    else:
-        msgFirmName = " "
-        # msgFirmName = FIRM_NAME[SEC_FIRM_ORDER] + " - "
-        # if SEC_FIRM_ORDER != 6: 
-        #     ARTICLE_BOARD_NAME = BOARD_NAME[SEC_FIRM_ORDER][ARTICLE_BOARD_ORDER]
-
-    SendMessageTitle += EMOJI_FIRE + msgFirmName + ARTICLE_BOARD_NAME + EMOJI_FIRE + "\n"
-    
-    return SendMessageTitle
-
 
 def GetSendChatId():
     SendMessageChatId = 0
@@ -359,9 +273,6 @@ def GetWorkDt(*args):
         SendMessageChatId = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
     
     return SendMessageChatId
-
-
-
 
 def fnguide_parse(*args):
     global LIST_ARTICLE_TITLE
@@ -405,37 +316,37 @@ def fnguide_parse(*args):
     return r
 
 def excel_write_title(*args):
-    global write_wb
-    global write_ws
+    # global write_wb
+    # global write_ws
     
-    pattern = ''
-    CODE = ''
-    for pattern in args:
-        if len(pattern) ==  0 or pattern ==  NoneType :
-                # 엑셀파일 쓰기
-                write_wb = Workbook()
-                # Sheet1에다 입력
-                write_ws = write_wb.active
-                # 타이틀
-                write_ws.cell(1, 1, '링크')
-                write_ws.cell(1, 2, '종목명')
-                write_ws.cell(1, 3, '종목코드')
-                write_ws.cell(1, 4, 'PER')
-                write_ws.cell(1, 5, 'fwd-PER')
-                write_ws.cell(1, 6, '시가배당')
+    # pattern = ''
+    # CODE = ''
+    # for pattern in args:
+    #     if len(pattern) ==  0 or pattern ==  NoneType :
+    #             # 엑셀파일 쓰기
+    #             write_wb = Workbook()
+    #             # Sheet1에다 입력
+    #             write_ws = write_wb.active
+    #             # 타이틀
+    #             write_ws.cell(1, 1, '링크')
+    #             write_ws.cell(1, 2, '종목명')
+    #             write_ws.cell(1, 3, '종목코드')
+    #             write_ws.cell(1, 4, 'PER')
+    #             write_ws.cell(1, 5, 'fwd-PER')
+    #             write_ws.cell(1, 6, '시가배당')
 
 
     # 엑셀파일 쓰기
-    # write_wb = Workbook()
+    write_wb = Workbook()
 
     # 이름이 있는 시트를 생성
-    # write_ws = write_wb.create_sheet('생성시트')
+    write_ws = write_wb.create_sheet('생성시트')
 
-    # # Sheet1에다 입력
-    # write_ws = write_wb.active
-    # # 타이틀
-    # write_ws['A1'] = '숫자'
-    # write_ws['B1'] = '종목명'
+    # Sheet1에다 입력
+    write_ws = write_wb.active
+    # 타이틀
+    write_ws['A1'] = '숫자'
+    write_ws['B1'] = '종목명'
 
     #행 단위로 추가
     write_ws.append([1,2,3])
