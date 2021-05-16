@@ -493,7 +493,7 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, 6, data_Pbr).number_format = '#,##0'
     write_ws.cell(nRowIdx, 7, data_Roe).number_format = '#,##0'
     write_ws.cell(nRowIdx, 8, data_Dps).number_format = '#,##0'
-    write_ws.cell(nRowIdx, 9, data_Dpsyield).number_format = '#,##0'
+    write_ws.cell(nRowIdx, 9, data_Dpsyield).number_format = '#,##0.00'
     write_ws.cell(nRowIdx, 10, data_매출액).number_format = '#,##0'
     write_ws.cell(nRowIdx, 11, data_영업이익).number_format = '#,##0'
     write_ws.cell(nRowIdx, 12, data_당기순이익).number_format = '#,##0'
