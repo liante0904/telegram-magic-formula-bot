@@ -436,9 +436,9 @@ def excel_write_row(*args):
     data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text
     data_업종 = " "#data_stxt1.strip().split(" ")[1]
     data_stxt2 = soup.select_one('#strMarketTxt').text
-    data_Per = int(soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text)
-    data_Pbr = int(soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text)
-    data_Roe = int(soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text)
+    data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
+    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text
+    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text
     data_Dps = ' '
     data_Dpsyield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
     data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text
