@@ -449,7 +449,7 @@ def excel_write_row(*args):
     data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text
     data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
     data_cmp_info = soup.select_one('#bizSummaryContent').text
-    data_거래소 = data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
+    data_거래소 = ''#data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
     #data_ROE = soup.select_one('#svdMainGrid10D > table > tbody > tr:nth-child(7) > td:nth-child(2)')#.text
     # r = ''
     # r += TARGET_URL + '\n'
