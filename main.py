@@ -439,8 +439,8 @@ def excel_write_row(*args):
     data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
     data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text
     data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text
-    data_Dps = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(21) > td:nth-child(4)').text
-    data_Dpsyield = str( round(int(data_Dps.replace(",","").replace('\xa0',"")) / int(data_price.replace(",","").replace('\xa0',""))  * 100 ,2) )  + '%'[0:3]
+    data_Dps = ' '
+    data_Dpsyield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
     data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text
     data_매출액 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text
     data_영업이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text
