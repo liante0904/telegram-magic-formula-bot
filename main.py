@@ -531,7 +531,7 @@ def excel_write_row(*args):
     cell = write_ws.cell(nRowIdx, 14, data_자본총계)
     cell.number_format = '#,##0'
     
-    data_거래소 = 'KOSPI 'if data_거래소 in ('KOSDAQ') else data_거래소 = 'KOSDAQ'
+    #data_거래소 = 'KOSPI 'if data_거래소 in ('KOSDAQ') else data_거래소 = 'KOSDAQ'
     print('data_거래소:', data_거래소)
     write_ws.cell(nRowIdx, 15, data_거래소)
     
