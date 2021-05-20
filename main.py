@@ -499,11 +499,11 @@ def excel_write_row(*args):
 
     if data_Pbr not in ('', '-'): data_Pbr = float(data_Pbr.replace(',',''))
     cell = write_ws.cell(nRowIdx, 6, data_Pbr)
-    cell.number_format = '#,##0'
+    cell.number_format = '##.##'
 
     if data_Roe not in ('', '-'): data_Roe = float(data_Roe.replace(',',''))
     cell = write_ws.cell(nRowIdx, 7, data_Roe)
-    cell.number_format = '#,##0'
+    cell.number_format = '##.##'
 
     # cell = write_ws.cell(nRowIdx, 8, data_Dps)
     # cell.number_format = '#,##0'
