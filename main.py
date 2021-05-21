@@ -397,7 +397,7 @@ def excel_write_title(*args):
     # write_ws.append([1,2,3])
     for idx in range(1, len(EXCEL_TITLE)):
         write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
-    write_ws.freeze_panes(1, 0) # 첫번째 Row 틀고정
+    write_ws.freeze_panes(1, 1) # 첫번째 Row 틀고정
     #셀 단위로 추가
     # write_ws.cell(5, 5, '5행5열')
     # write_wb.save(strFileName)
