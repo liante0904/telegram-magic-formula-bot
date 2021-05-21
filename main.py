@@ -473,7 +473,7 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, 16).value =  data_cmp_nm+ '('+ data_cmp_code +')'
     write_ws.cell(nRowIdx, 16).style = "Hyperlink"
 
-    write_ws.cell(nRowIdx, 17, data_cmp_info)
+    write_ws.cell(nRowIdx, 17, str(data_cmp_info).strip())
 
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
