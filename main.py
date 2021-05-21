@@ -91,8 +91,9 @@ EXCEL_TITLE = (
     "시가총액(억원)",   #11
     "자본총계(억원)",   #12
     "거래소",            #13
-    "네이버 금융",
-    "fnguide"
+    "네이버 금융",      #14
+    "fnguide",          #15
+    "기업개요"          #16
 )
 
 
@@ -365,47 +366,10 @@ def fnguide_parse(*args):
 def excel_write_title(*args):
     
     # 타이틀
-
-    # pattern = ''
-    # CODE = ''
-    # for pattern in args:
-    #     if len(pattern) ==  0 or pattern ==  NoneType :
-    #             # 엑셀파일 쓰기
-    #             write_wb = Workbook()
-    #             # Sheet1에다 입력
-    #             write_ws = write_wb.active
-    #             # 타이틀
-    #             write_ws.cell(1, 1, '링크')
-    #             write_ws.cell(1, 2, '종목명')
-    #             write_ws.cell(1, 3, '종목코드')
-    #             write_ws.cell(1, 4, 'PER')
-    #             write_ws.cell(1, 5, 'fwd-PER')
-    #             write_ws.cell(1, 6, '시가배당')
-
-
-    # # 엑셀파일 쓰기
-    # write_wb = Workbook()
-
-    # # 이름이 있는 시트를 생성
-    # write_ws = write_wb.create_sheet('Sheet1')
-
-    # # Sheet1에다 입력
-    # write_ws = write_wb.active
-    # 타이틀
-    #write_ws['B1'] = '숫자'
-    #write_ws['B1'] = '종목명'
-    # write_ws.append([1,2,3])
     for idx in range(1, len(EXCEL_TITLE)):
         write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
 
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
-
-    #셀 단위로 추가
-    # write_ws.cell(5, 5, '5행5열')
-    # write_wb.save(strFileName)
-
-    # 출처 https://myjamong.tistory.com/51
-
 
 def excel_write_row(*args):
 
@@ -499,10 +463,6 @@ def excel_write_row(*args):
     else: data_거래소 = 'KOSPI'
     write_ws.cell(nRowIdx, 14, data_거래소)
     
-
-
-    #write_ws.cell(row=1, column=1).value = '=HYPERLINK("{}", "{}")'.format("https://www.google.com", "Check Google")
-    
     # 네이버 링크
     write_ws.cell(nRowIdx, 15).hyperlink = NAVER_URL
     write_ws.cell(nRowIdx, 15).value =  data_cmp_nm+ '('+ data_cmp_code +')'
@@ -513,19 +473,8 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, 16).value =  data_cmp_nm+ '('+ data_cmp_code +')'
     write_ws.cell(nRowIdx, 16).style = "Hyperlink"
 
-    '''
-    cell = write_ws.cell(nRowIdx, 13, data_자본총계)
-    cell.number_format = '#,##0'
+    write_ws.cell(nRowIdx, 17, data_cmp_info)
 
-    cell.value = 내용
-    cell.hyperlink = 주소
-    cell.style = "Hyperlink"
-    '''
-    #셀 단위로 추가
-    # write_ws.cell(5, 5, '5행5열')
-    #write_wb.save(strFileName)
-
-    # 출처 https://myjamong.tistory.com/51
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
     pattern = ''
