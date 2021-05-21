@@ -68,6 +68,10 @@ SELECT_ITEM = (
 # 엑셀파일 쓰기
 write_wb = Workbook()
 
+# 초기 시트 삭제
+write_wb.remove(write_wb['Sheet1'])
+write_wb.remove(write_wb['Sheet2'])
+write_wb.remove(write_wb['Sheet3'])
 # 이름이 있는 시트를 생성
 write_ws = write_wb.create_sheet('Sheet1')
 
@@ -393,7 +397,7 @@ def excel_write_title(*args):
     # write_ws.append([1,2,3])
     for idx in range(1, len(EXCEL_TITLE)):
         write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
-
+    write_ws.freeze_panes(1, 0) # 첫번째 Row 틀고정
     #셀 단위로 추가
     # write_ws.cell(5, 5, '5행5열')
     # write_wb.save(strFileName)
