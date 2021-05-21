@@ -69,9 +69,7 @@ SELECT_ITEM = (
 write_wb = Workbook()
 
 # 초기 시트 삭제
-write_wb.remove(write_wb['Sheet1'])
-write_wb.remove(write_wb['Sheet2'])
-write_wb.remove(write_wb['Sheet3'])
+write_wb.remove(write_wb['Sheet'])
 # 이름이 있는 시트를 생성
 write_ws = write_wb.create_sheet('Sheet1')
 
@@ -92,7 +90,9 @@ EXCEL_TITLE = (
     "당기순이익(억원)", #10
     "시가총액(억원)",   #11
     "자본총계(억원)",   #12
-    "거래소"            #13
+    "거래소",            #13
+    "네이버 금융",
+    "fnguide"
 )
 
 
@@ -413,6 +413,8 @@ def excel_write_row(*args):
 
 
     TARGET_URL = 'http://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?MenuYn=Y&gicode='+ 'A'+ strIsuNo
+    NAVER_URL= 'https://finance.naver.com/item/main.nhn?code=' + strIsuNo
+    FNGUIDE_URL = TARGET_URL
     webpage = requests.get(TARGET_URL, verify=False)
 
     # HTML parse
@@ -496,6 +498,25 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, 14, data_거래소)
     
 
+
+    #write_ws.cell(row=1, column=1).value = '=HYPERLINK("{}", "{}")'.format("https://www.google.com", "Check Google")
+    
+    # 네이버 링크
+    write_ws.cell(nRowIdx, 15).hyperlink = NAVER_URL
+    write_ws.cell(nRowIdx, 15).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, 15).style = "Hyperlink"
+
+    # FNGUIDE 링크
+    write_ws.cell(nRowIdx, 16).value = '=HYPERLINK("{}", "{}")'.format( FNGUIDE_URL , data_cmp_nm+ '('+ data_cmp_code +')')
+
+    '''
+    cell = write_ws.cell(nRowIdx, 13, data_자본총계)
+    cell.number_format = '#,##0'
+
+    cell.value = 내용
+    cell.hyperlink = 주소
+    cell.style = "Hyperlink"
+    '''
     #셀 단위로 추가
     # write_ws.cell(5, 5, '5행5열')
     #write_wb.save(strFileName)
