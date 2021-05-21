@@ -509,7 +509,9 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, 15).style = "Hyperlink"
 
     # FNGUIDE 링크
-    write_ws.cell(nRowIdx, 16).value = '=HYPERLINK("{}", "{}")'.format( FNGUIDE_URL , data_cmp_nm+ '('+ data_cmp_code +')')
+    write_ws.cell(nRowIdx, 16).hyperlink = FNGUIDE_URL
+    write_ws.cell(nRowIdx, 16).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, 16).style = "Hyperlink"
 
     '''
     cell = write_ws.cell(nRowIdx, 13, data_자본총계)
