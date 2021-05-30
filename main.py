@@ -5,6 +5,7 @@ import datetime
 from datetime import date, timedelta
 import math
 from openpyxl import Workbook # 엑셀
+from openpyxl.styles import numbers
 from pytz import timezone
 # import urlparse
 import telegram
@@ -67,6 +68,8 @@ SELECT_ITEM = (
 # 엑셀파일 쓰기
 write_wb = Workbook()
 
+# 초기 시트 삭제
+write_wb.remove(write_wb['Sheet'])
 # 이름이 있는 시트를 생성
 write_ws = write_wb.create_sheet('Sheet1')
 
@@ -75,20 +78,22 @@ write_ws = write_wb.active
 # 엑셀출력 상수
 EXCEL_TITLE = (
     "",               # 0
-    "섹터",             # 1
+    "섹터&업종",             # 1
     "종목명",           # 2
-    "주가",          # 3
+    "전일종가(원)",          # 3
     "PER",              # 4
     "PBR",              # 5
     "ROE",              # 6
-    "DPS",              # 7
-    "DPS Yield",              # 8
-    "매출액(억원)",     #9
-    "영업이익(억원)",   #10
-    "당기순이익(억원)", #11
-    "시가총액(억원)",   #12
-    "자본총계(억원)",   #13
-    "거래소"            #14
+    "DPS Yield(%)",    # 7
+    "매출액(억원)",     # 8
+    "영업이익(억원)",   #9
+    "당기순이익(억원)", #10
+    "시가총액(억원)",   #11
+    "자본총계(억원)",   #12
+    "거래소",            #13
+    "네이버 금융",      #14
+    "fnguide",          #15
+    "기업개요"          #16
 )
 
 
@@ -352,64 +357,12 @@ def fnguide_parse(*args):
 def excel_write_title(*args):
     
     # 타이틀
-
-    # pattern = ''
-    # CODE = ''
-    # for pattern in args:
-    #     if len(pattern) ==  0 or pattern ==  NoneType :
-    #             # 엑셀파일 쓰기
-    #             write_wb = Workbook()
-    #             # Sheet1에다 입력
-    #             write_ws = write_wb.active
-    #             # 타이틀
-    #             write_ws.cell(1, 1, '링크')
-    #             write_ws.cell(1, 2, '종목명')
-    #             write_ws.cell(1, 3, '종목코드')
-    #             write_ws.cell(1, 4, 'PER')
-    #             write_ws.cell(1, 5, 'fwd-PER')
-    #             write_ws.cell(1, 6, '시가배당')
-
-
-    # # 엑셀파일 쓰기
-    # write_wb = Workbook()
-
-    # # 이름이 있는 시트를 생성
-    # write_ws = write_wb.create_sheet('Sheet1')
-
-    # # Sheet1에다 입력
-    # write_ws = write_wb.active
-    # 타이틀
-    #write_ws['B1'] = '숫자'
-    #write_ws['B1'] = '종목명'
-    # write_ws.append([1,2,3])
     for idx in range(1, len(EXCEL_TITLE)):
         write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
 
-    #셀 단위로 추가
-    # write_ws.cell(5, 5, '5행5열')
-    # write_wb.save(strFileName)
-
-    # 출처 https://myjamong.tistory.com/51
-
+    write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
 
 def excel_write_row(*args):
-# EXCEL_TITLE = (
-#     "",               # 0
-#     "섹터",             # 1
-#     "종목명",           # 2
-#     "주가",          # 3
-#     "PER",              # 4
-#     "PBR",              # 5
-#     "ROE",              # 6
-#     "DPS",              # 7
-#     "DPS Yield",              # 8
-#     "매출액(억원)",     #9
-#     "영업이익(억원)",   #10
-#     "당기순이익(억원)", #11
-#     "시가총액(억원)",   #12
-#     "자본총계(억원)",   #13
-#     "거래소"            #14
-# )
 
     strIsuNo = str(args[0])
     nRowIdx  = int(args[1]) + 1 # 첫번째 레코드는 헤더를 쓰기 때문
@@ -417,111 +370,102 @@ def excel_write_row(*args):
 
 
     TARGET_URL = 'http://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?MenuYn=Y&gicode='+ 'A'+ strIsuNo
+    NAVER_URL= 'https://finance.naver.com/item/main.nhn?code=' + strIsuNo
+    FNGUIDE_URL = TARGET_URL
     webpage = requests.get(TARGET_URL, verify=False)
 
     # HTML parse
     soup = BeautifulSoup(webpage.content, "html.parser")
-    data_cmp_nm = soup.select_one('#giName').text
-    data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text
-    data_price =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0]
-    data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text
-    data_업종 = data_stxt1
-    data_stxt2 = soup.select_one('#strMarketTxt').text
-    data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
-    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text
-    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text
-    data_Dps = ' '
-    data_Dpsyield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
-    data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text
-    data_매출액 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text
-    data_영업이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text
-    data_당기순이익= soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(4) > td:nth-child(4)').text
-    data_자본총계 = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(7) > td:nth-child(4)').text
-    data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text
-    data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
-    data_cmp_info = soup.select_one('#bizSummaryContent').text
-    data_거래소 = data_stxt1#data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
-    #data_ROE = soup.select_one('#svdMainGrid10D > table > tbody > tr:nth-child(7) > td:nth-child(2)')#.text
-    # r = ''
-    # r += TARGET_URL + '\n'
-    # r += '==============================================================' + '\n'
-    # r += '종목명: ' + data_cmp_nm                                + '\n'
-    # r += '종목코드: ' + data_cmp_code                            + '\n'
-    # r += '업종: ' + data_stxt1                                      + '\t' + data_stxt2 + '\n'
-    # r += 'per(FY0): ' + data_Per                                      + '\n'
-    # r += '12m fwd per: ' + data_fwdPer                           + '\n'
-    # r += '시가배당 수익률 '  + data_dividendYield                + '\n'
-    # r += '기업개요:' + data_cmp_info                 + '\n'
-    # r += '==============================================================' + '\n'
+    data_cmp_nm = soup.select_one('#giName').text.strip()
+    data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text.strip()
+    data_price =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0].strip()
+    data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text.strip()
+    data_업종 = data_stxt1.strip()
+    data_세부업종 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt2').text.strip()
+    data_stxt2 = soup.select_one('#strMarketTxt').text.strip()
+    data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text.strip()
+    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text.strip()
+    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text.strip()
+    data_Dpsyield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text.strip().replace('%','')
+    data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text.strip()
+    data_매출액 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text.strip()
+    data_영업이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text.strip()
+    data_당기순이익= soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(4) > td:nth-child(4)').text.strip()
+    data_자본총계 = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(7) > td:nth-child(4)').text.strip()
+    data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text.strip()
+    data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text.strip()
+    data_cmp_info = soup.select_one('#bizSummaryContent').text.strip()
+    data_거래소 = data_stxt1.strip()#data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
+    
+    # 첫번째 열은 사용하지 않음
+    data_업종 = str(data_업종).replace('KSE','').replace('KOSDAQ', '').replace('코스피', '').replace('코스닥','').strip()
+    if len(data_업종) == 0 : data_업종 = str(data_세부업종).replace("FICS",'').strip()
 
-
-# EXCEL_TITLE = (
-#     "",               # 0
-#     "섹터",             # 1
-#     "종목명",           # 2
-#     "주가",          # 3
-#     "PER",              # 4
-#     "PBR",              # 5
-#     "ROE",              # 6
-#     "DPS",              # 7
-#     "시가배당률",              # 8
-#     "매출액(억원)",     #9
-#     "영업이익(억원)",   #10
-#     "당기순이익(억원)", #11
-#     "시가총액(억원)",   #12
-#     "자본총계(억원)",   #13
-#     "거래소"            #14
-# )
-    
-    print('nRowIdx:', nRowIdx, 'data_cmp_nm:', data_cmp_nm)
-    #print(data_stxt1[2])
-    
-    
     write_ws.cell(nRowIdx, 2, data_업종)
     write_ws.cell(nRowIdx, 3, data_cmp_nm)
+
+    if data_price not in ('', '-'): data_price = float(data_price.replace(',',''))
+    else: data_price = ''
     cell = write_ws.cell(nRowIdx, 4, data_price)
     cell.number_format = '#,##0'
 
+    if data_Per not in ('', '-'): data_Per = float(data_Per.replace(',',''))
+    else: data_Per = ''
     cell = write_ws.cell(nRowIdx, 5, data_Per)
-    cell.number_format = '#,##0'
-
-    cell = write_ws.cell(nRowIdx, 6, data_Pbr)
-    cell.number_format = '#,##0'
-
-    cell = write_ws.cell(nRowIdx, 7, data_Roe)
-    cell.number_format = '#,##0'
-
-    cell = write_ws.cell(nRowIdx, 8, data_Dps)
-    cell.number_format = '#,##0'
-
-    cell = write_ws.cell(nRowIdx, 9, data_Dpsyield)
     cell.number_format = '#,##0.00'
 
-    cell = write_ws.cell(nRowIdx, 10, data_매출액)
+    if data_Pbr not in ('', '-'): data_Pbr = float(data_Pbr.replace(',',''))
+    else: data_Pbr = ''
+    cell = write_ws.cell(nRowIdx, 6, data_Pbr)
+    cell.number_format = '#,##0.00'
+
+    if data_Roe not in ('', '-'): data_Roe = float(data_Roe.replace(',',''))
+    else: data_Roe = ''
+    cell = write_ws.cell(nRowIdx, 7, data_Roe)
+    cell.number_format = '#,##0.00'
+
+    if data_Dpsyield not in ('', '-'): data_Dpsyield = float(data_Dpsyield.replace(',',''))
+    else: data_Dpsyield = ''
+    cell = write_ws.cell(nRowIdx, 8, data_Dpsyield)
+    cell.number_format = '#,##0.00'
+
+    if data_매출액 not in ('', '-'): data_매출액 = float(data_매출액.replace(',',''))
+    cell = write_ws.cell(nRowIdx, 9, data_매출액)
     cell.number_format = '#,##0'
 
-    cell = write_ws.cell(nRowIdx, 11, data_영업이익)
+    if data_영업이익 not in ('', '-'): data_영업이익 = float(data_영업이익.replace(',',''))
+    cell = write_ws.cell(nRowIdx, 10, data_영업이익)
     cell.number_format = '#,##0'
 
-    cell = write_ws.cell(nRowIdx, 12, data_당기순이익)
+    if data_당기순이익 not in ('', '-'): data_당기순이익 = float(data_당기순이익.replace(',',''))
+    cell = write_ws.cell(nRowIdx, 11, data_당기순이익)
     cell.number_format = '#,##0'
 
-    cell = write_ws.cell(nRowIdx, 13, data_시가총액)
+    if data_시가총액 not in ('', '-'): data_시가총액 = float(data_시가총액.replace(',',''))
+    cell = write_ws.cell(nRowIdx, 12, data_시가총액)
     cell.number_format = '#,##0'
 
-    cell = write_ws.cell(nRowIdx, 14, data_자본총계)
+    if data_자본총계 not in ('', '-'): data_자본총계 = float(data_자본총계.replace(',',''))
+    cell = write_ws.cell(nRowIdx, 13, data_자본총계)
     cell.number_format = '#,##0'
     
-    write_ws.cell(nRowIdx, 15, data_거래소)
+
+    if 'KOSDAQ' in data_거래소 :  data_거래소 = 'KOSDAQ'
+    else: data_거래소 = 'KOSPI'
+    write_ws.cell(nRowIdx, 14, data_거래소)
     
+    # 네이버 링크
+    write_ws.cell(nRowIdx, 15).hyperlink = NAVER_URL
+    write_ws.cell(nRowIdx, 15).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, 15).style = "Hyperlink"
 
-    
+    # FNGUIDE 링크
+    write_ws.cell(nRowIdx, 16).hyperlink = FNGUIDE_URL
+    write_ws.cell(nRowIdx, 16).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, 16).style = "Hyperlink"
 
-    #셀 단위로 추가
-    # write_ws.cell(5, 5, '5행5열')
-    #write_wb.save(strFileName)
+    write_ws.cell(nRowIdx, 17, str(data_cmp_info).strip())
 
-    # 출처 https://myjamong.tistory.com/51
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
     pattern = ''
