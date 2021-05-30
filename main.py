@@ -232,20 +232,11 @@ def MagicFormula_crowling(*args):
                 file.write(write)      # 파일에 문자열 저장
                 nRowCnt=+1
         else: ## 2
+            excel_write_title()
             for r in jres:
-                if nRowIdx == 0: excel_write_title()
-                else: excel_write_row(r['CMP_CD'], nRowIdx)
                 nRowIdx= nRowIdx + 1
+                excel_write_row(r['CMP_CD'], nRowIdx)
                 
-                
-                # write = ''
-                # write += NAVER_URL + r['CMP_CD'] + '\t' +'종목명:' + r['CMP_NM_KOR'] + '\n'
-                # write += fnguide_parse(r['CMP_CD']) + '\n'
-                # print(write)
-                # file.write(write)      # 파일에 문자열 저장
-        
-        
-            
         TARGET_URL = TARGET_URL.replace('currentPage='+ str(idx), 'currentPage='+ str(idx+1)  )
 
     if data_selected == 0 or data_selected == 1:
