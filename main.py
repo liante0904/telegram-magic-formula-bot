@@ -419,8 +419,8 @@ def excel_write_row(*args):
     cell = write_ws.cell(nRowIdx, 6, data_Pbr)
     cell.number_format = '#,##0.00'
 
-    if data_Roe not in ('', '-'): data_Roe = float(data_Roe.replace(',',''))
-    else: data_Roe = ''
+    if data_Roe not in ('', '-') and if ( type(data_Roe) == "<class 'int'>" or type(data_Roe) == "<class 'float'>" ): data_Roe = float(data_Roe.replace(',',''))
+
     cell = write_ws.cell(nRowIdx, 7, data_Roe)
     cell.number_format = '#,##0.00'
 
