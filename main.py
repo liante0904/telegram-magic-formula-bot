@@ -527,14 +527,18 @@ def main():
 
     def start(update, context):
         task_buttons =  [
-            [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
-            [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
-            [ InlineKeyboardButton( '2.마법공식 엑셀', callback_data=2 ) ] ,
-            [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
+            [ telegram.KeyboardButton( '0.스크리닝 직접 입력모드', callback_data=0 ) ],
+            [ telegram.KeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
+            [ telegram.KeyboardButton( '2.마법공식 엑셀', callback_data=2 ) ] ,
+            [ telegram.KeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
         
-        reply_markup = InlineKeyboardMarkup( task_buttons )
-        
+        reply_markup = telegram.ReplyKeyboardMarkup( task_buttons )
+
+        # kb = [[telegram.KeyboardButton('command1', callback_data=0)],
+        #     [telegram.KeyboardButton('command2', callback_data=1)]]
+        # kb_markup = telegram.ReplyKeyboardMarkup(kb)
+
         context.bot.send_message(
             chat_id=update.message.chat_id
             , text='작업을 선택해주세요.'
@@ -582,6 +586,9 @@ def main():
 
 
     def get_screening_url(update, context):
+        print(update)
+        print(context.bot)
+        return
         if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
