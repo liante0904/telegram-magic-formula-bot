@@ -215,6 +215,7 @@ def MagicFormula_crowling(*args):
 
     nRowIdx = 0
     for idx in range(1, TOTAL_PAGE_CNT+1):
+        # GetProgressIndicate(nTotalIdx =TOTAL_CMP_CNT, nCurrentIdx=nRowIdx)
         paging = 'currentPage='
         paging += str(idx)
         
@@ -266,6 +267,21 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     bot = telegram.Bot(token = my_token_key)
 
     bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    
+    time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
+
+def sendSilentText(sendMessageText): # 가공없이 텍스트를 발송합니다.
+    global CHAT_ID
+
+    print('sendText()')
+
+    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
+    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
+    #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
+    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
+    bot = telegram.Bot(token = my_token_key)
+
+    bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown", disable_notification=True)
     
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
@@ -333,7 +349,10 @@ def fnguide_parse(*args):
     data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text
     data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text
     data_stxt2 = soup.select_one('#strMarketTxt').text
+    data_세부업종 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt2').text.strip()
     data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text
+    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text.strip()
+    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text.strip()
     data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text
     data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text
     data_cmp_info = soup.select_one('#bizSummaryContent').text
@@ -343,9 +362,11 @@ def fnguide_parse(*args):
     r += '==============================================================' + '\n'
     r += '종목명: ' + data_cmp_nm                                + '\n'
     r += '종목코드: ' + data_cmp_code                            + '\n'
-    r += '업종: ' + data_stxt1                                      + '\t' + data_stxt2 + '\n'
-    r += 'per(FY0): ' + data_Per                                      + '\n'
-    r += '12m fwd per: ' + data_fwdPer                           + '\n'
+    r += '업종: ' + data_stxt1                                      + '\t' + data_stxt2 +" / "+ data_세부업종 +'\n'
+    r += 'PER(FY0): ' + data_Per                                      + '\n'
+    r += '12m FWD PER: ' + data_fwdPer                           + '\n'
+    r += 'PBR(FY0): ' + data_Pbr                                      + '\n'
+    r += 'ROE(FY0): ' + data_Roe                                      + '\n'
     r += '시가배당 수익률 '  + data_dividendYield                + '\n'
     r += '기업개요:' + data_cmp_info                 + '\n'
     r += '==============================================================' + '\n'
@@ -500,6 +521,25 @@ def GetCurrentDate(*args):
 
     return DATE
 
+def GetProgressIndicate(nTotalIdx, nCurrentIdx):
+    nSendIdx = 0
+    nIndicate = int( ( nCurrentIdx / nTotalIdx ) * 100 )
+    print('print progress..', int( ( nCurrentIdx / nTotalIdx ) * 100 ) )
+    # if nIndicate in range(25, 29): nSendIdx = 0
+    if nIndicate in range(30, 39): 
+        # nSendIdx = 1
+        sendSilentText('/start 를 눌러 시작해보세요.')
+    elif nIndicate in range(40, 60): 
+        # nSendIdx = 2
+        sendSilentText('/start 를 눌러 시작해보세요.')
+    elif nIndicate in range(40, 60): 
+        # nSendIdx = 0
+        sendSilentText('/start 를 눌러 시작해보세요.')
+
+    # if ( nCurrentIdx / nTotalIdx ) * 100 > 30 
+    # sendText('/start 를 눌러 시작해보세요.')
+    return
+
 def main():
     global CHAT_ID
     global data_selected
@@ -527,18 +567,14 @@ def main():
 
     def start(update, context):
         task_buttons =  [
-            [ telegram.KeyboardButton( '0.스크리닝 직접 입력모드', callback_data=0 ) ],
-            [ telegram.KeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
-            [ telegram.KeyboardButton( '2.마법공식 엑셀', callback_data=2 ) ] ,
-            [ telegram.KeyboardButton( '3.준비중', callback_data=3 ) ] 
+            [ InlineKeyboardButton( '0.[txt]스크리닝 직접 입력모드', callback_data=0 ) ],
+            [ InlineKeyboardButton( '1.[txt]마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
+            [ InlineKeyboardButton( '2.[xls]마법공식 엑셀', callback_data=2 ) ] ,
+            [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
         
-        reply_markup = telegram.ReplyKeyboardMarkup( task_buttons )
-
-        # kb = [[telegram.KeyboardButton('command1', callback_data=0)],
-        #     [telegram.KeyboardButton('command2', callback_data=1)]]
-        # kb_markup = telegram.ReplyKeyboardMarkup(kb)
-
+        reply_markup = InlineKeyboardMarkup( task_buttons )
+        
         context.bot.send_message(
             chat_id=update.message.chat_id
             , text='작업을 선택해주세요.'
@@ -558,11 +594,14 @@ def main():
         print(data_selected)
         if data_selected == 0 or data_selected == 2:
             # 스크리닝 공식 받기
-            context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-                                        chat_id=update.callback_query.message.chat_id,
-                                        message_id=update.callback_query.message.message_id)
-            bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
-            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            # context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
+            #                             chat_id=update.callback_query.message.chat_id,
+            #                             message_id=update.callback_query.message.message_id)
+            bot.sendMessage(chat_id=chat_id, text=format(SELECT_ITEM[data_selected]) +" 선택되었습니다."+'\n' + '\n' 
+                                                + "가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n'
+                                                + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging' + '\n'  + '\n' 
+                                                + "가이드를 참조하여 스크리닝 URL을 입력하세요.")     
+            # bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
@@ -586,9 +625,6 @@ def main():
 
 
     def get_screening_url(update, context):
-        print(update)
-        print(context.bot)
-        return
         if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
