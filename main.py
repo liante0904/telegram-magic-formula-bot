@@ -114,7 +114,7 @@ EMOJI_PICK = u'\U0001F449'
 
 strFileName = ''
 
-data_selected = 0
+data_selected = -1
 
 NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 # JSON API 타입
@@ -299,6 +299,49 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     bot.sendDocument(chat_id = CHAT_ID, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+
+def EBEST_downloadFile(ARTICLE_URL):
+    global ATTACH_FILE_NAME
+    global LIST_ARTICLE_TITLE
+
+    requests.packages.urllib3.disable_warnings()
+
+    ATTACH_BASE_URL = 'https://www.ebestsec.co.kr/_bt_lib/util/download.jsp?dataType='
+
+    webpage = requests.get(ARTICLE_URL, verify=False)
+    # HTML parse
+    soup = BeautifulSoup(webpage.content, "html.parser")
+    # 게시글 제목(게시판 리스트의 제목은 짤려서 본문 제목 사용)
+    table = soup.select_one('#contents > table')
+    tbody = table.select_one('tbody')
+    trs = soup.select('tr')
+    LIST_ARTICLE_TITLE = trs[0].select_one('td').text
+    
+    # 첨부파일 URL
+    attachFileCode = BeautifulSoup(webpage.content, "html.parser").select_one('.attach > a')['href']
+    ATTACH_URL = attachFileCode.replace('Javascript:download("', ATTACH_BASE_URL).replace('")', '').replace('https', 'http')
+    # 첨부파일 이름
+    ATTACH_FILE_NAME = BeautifulSoup(webpage.content, "html.parser").select_one('.attach > a').text.strip()
+    DownloadFile(URL = ATTACH_URL, FILE_NAME = ATTACH_FILE_NAME)
+    
+    return ATTACH_URL
+
+# URL에 파일명을 사용할때 한글이 포함된 경우 인코딩처리 로직 추가 
+def DownloadFile(URL, FILE_NAME):
+    global ATTACH_FILE_NAME
+    global strFileName
+    print("DownloadFile()")
+
+
+    ATTACH_FILE_NAME = re.sub('[\/:*?"<>|]','',FILE_NAME) # 저장할 파일명 : 파일명으로 사용할수 없는 문자 삭제 변환
+    print('convert URL:',URL)
+    print('convert ATTACH_FILE_NAME:',ATTACH_FILE_NAME)
+    with open(ATTACH_FILE_NAME, "wb")as file:  # open in binary mode
+        response = get(URL, verify=False)     # get request
+        file.write(response.content) # write to file
+        
+    strFileName = ATTACH_FILE_NAME
+    return True
 
 def GetSendChatId():
     SendMessageChatId = 0
@@ -559,8 +602,6 @@ def main():
         chat_id = '183792411'
         CHAT_ID = '183792411'
     
-    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
-
     updater = Updater( token=BOT_TOKEN, use_context=True )
     # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
@@ -585,7 +626,6 @@ def main():
     start_handler = CommandHandler('start', start)
     
     dispatcher.add_handler(start_handler)
-
 
     def callback_get(update, context):
         global data_selected
@@ -643,11 +683,19 @@ def main():
                 MagicFormula_crowling(0, URL)
             except:
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.")                
+    def ebestsec_download(update, context):
+        inputURL = update.message.text
+        if 'ebestsec' not in inputURL:  sendSilentText('/start 를 눌러 시작해보세요.')
+        else:
+            EBEST_downloadFile(ARTICLE_URL=inputURL)
+            sendDocument()
 
 
     if data_selected == 0 or data_selected == 1 or data_selected == 2:
-        print('data_selected:',data_selected)
         message_handler = MessageHandler(Filters.text, get_screening_url)
+        updater.dispatcher.add_handler(message_handler)
+    else: # 아무것도 선택 안함 
+        message_handler = MessageHandler(Filters.text, ebestsec_download)
         updater.dispatcher.add_handler(message_handler)
 
     updater.start_polling()
