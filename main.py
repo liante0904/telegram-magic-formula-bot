@@ -114,7 +114,7 @@ EMOJI_PICK = u'\U0001F449'
 
 strFileName = ''
 
-data_selected = -1
+data_selected = 0
 
 NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 # JSON API 타입
@@ -215,7 +215,6 @@ def MagicFormula_crowling(*args):
 
     nRowIdx = 0
     for idx in range(1, TOTAL_PAGE_CNT+1):
-        # GetProgressIndicate(nTotalIdx =TOTAL_CMP_CNT, nCurrentIdx=nRowIdx)
         paging = 'currentPage='
         paging += str(idx)
         
@@ -270,21 +269,6 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
-def sendSilentText(sendMessageText): # 가공없이 텍스트를 발송합니다.
-    global CHAT_ID
-
-    print('sendText()')
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
-    #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
-    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
-    bot = telegram.Bot(token = my_token_key)
-
-    bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown", disable_notification=True)
-    
-    time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
-
 def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     global CHAT_ID
 
@@ -299,49 +283,6 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     bot.sendDocument(chat_id = CHAT_ID, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
-
-def EBEST_downloadFile(ARTICLE_URL):
-    global ATTACH_FILE_NAME
-    global LIST_ARTICLE_TITLE
-
-    requests.packages.urllib3.disable_warnings()
-
-    ATTACH_BASE_URL = 'https://www.ebestsec.co.kr/_bt_lib/util/download.jsp?dataType='
-
-    webpage = requests.get(ARTICLE_URL, verify=False)
-    # HTML parse
-    soup = BeautifulSoup(webpage.content, "html.parser")
-    # 게시글 제목(게시판 리스트의 제목은 짤려서 본문 제목 사용)
-    table = soup.select_one('#contents > table')
-    tbody = table.select_one('tbody')
-    trs = soup.select('tr')
-    LIST_ARTICLE_TITLE = trs[0].select_one('td').text
-    
-    # 첨부파일 URL
-    attachFileCode = BeautifulSoup(webpage.content, "html.parser").select_one('.attach > a')['href']
-    ATTACH_URL = attachFileCode.replace('Javascript:download("', ATTACH_BASE_URL).replace('")', '').replace('https', 'http')
-    # 첨부파일 이름
-    ATTACH_FILE_NAME = BeautifulSoup(webpage.content, "html.parser").select_one('.attach > a').text.strip()
-    DownloadFile(URL = ATTACH_URL, FILE_NAME = ATTACH_FILE_NAME)
-    
-    return ATTACH_URL
-
-# URL에 파일명을 사용할때 한글이 포함된 경우 인코딩처리 로직 추가 
-def DownloadFile(URL, FILE_NAME):
-    global ATTACH_FILE_NAME
-    global strFileName
-    print("DownloadFile()")
-
-
-    ATTACH_FILE_NAME = re.sub('[\/:*?"<>|]','',FILE_NAME) # 저장할 파일명 : 파일명으로 사용할수 없는 문자 삭제 변환
-    print('convert URL:',URL)
-    print('convert ATTACH_FILE_NAME:',ATTACH_FILE_NAME)
-    with open(ATTACH_FILE_NAME, "wb")as file:  # open in binary mode
-        response = get(URL, verify=False)     # get request
-        file.write(response.content) # write to file
-        
-    strFileName = ATTACH_FILE_NAME
-    return True
 
 def GetSendChatId():
     SendMessageChatId = 0
@@ -564,25 +505,6 @@ def GetCurrentDate(*args):
 
     return DATE
 
-def GetProgressIndicate(nTotalIdx, nCurrentIdx):
-    nSendIdx = 0
-    nIndicate = int( ( nCurrentIdx / nTotalIdx ) * 100 )
-    print('print progress..', int( ( nCurrentIdx / nTotalIdx ) * 100 ) )
-    # if nIndicate in range(25, 29): nSendIdx = 0
-    if nIndicate in range(30, 39): 
-        # nSendIdx = 1
-        sendSilentText('/start 를 눌러 시작해보세요.')
-    elif nIndicate in range(40, 60): 
-        # nSendIdx = 2
-        sendSilentText('/start 를 눌러 시작해보세요.')
-    elif nIndicate in range(40, 60): 
-        # nSendIdx = 0
-        sendSilentText('/start 를 눌러 시작해보세요.')
-
-    # if ( nCurrentIdx / nTotalIdx ) * 100 > 30 
-    # sendText('/start 를 눌러 시작해보세요.')
-    return
-
 def main():
     global CHAT_ID
     global data_selected
@@ -602,15 +524,17 @@ def main():
         chat_id = '183792411'
         CHAT_ID = '183792411'
     
+    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
+
     updater = Updater( token=BOT_TOKEN, use_context=True )
     # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
 
     def start(update, context):
         task_buttons =  [
-            [ InlineKeyboardButton( '0.[txt]스크리닝 직접 입력모드', callback_data=0 ) ],
-            [ InlineKeyboardButton( '1.[txt]마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
-            [ InlineKeyboardButton( '2.[xls]마법공식 엑셀', callback_data=2 ) ] ,
+            [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
+            [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
+            [ InlineKeyboardButton( '2.마법공식 엑셀', callback_data=2 ) ] ,
             [ InlineKeyboardButton( '3.준비중', callback_data=3 ) ] 
         ]
         
@@ -627,6 +551,7 @@ def main():
     
     dispatcher.add_handler(start_handler)
 
+
     def callback_get(update, context):
         global data_selected
         print("callback")
@@ -634,14 +559,11 @@ def main():
         print(data_selected)
         if data_selected == 0 or data_selected == 2:
             # 스크리닝 공식 받기
-            # context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-            #                             chat_id=update.callback_query.message.chat_id,
-            #                             message_id=update.callback_query.message.message_id)
-            bot.sendMessage(chat_id=chat_id, text=format(SELECT_ITEM[data_selected]) +" 선택되었습니다."+'\n' + '\n' 
-                                                + "가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n'
-                                                + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging' + '\n'  + '\n' 
-                                                + "가이드를 참조하여 스크리닝 URL을 입력하세요.")     
-            # bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
+                                        chat_id=update.callback_query.message.chat_id,
+                                        message_id=update.callback_query.message.message_id)
+            bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
+            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
@@ -683,19 +605,11 @@ def main():
                 MagicFormula_crowling(0, URL)
             except:
                 bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.")                
-    def ebestsec_download(update, context):
-        inputURL = update.message.text
-        if 'ebestsec' not in inputURL:  sendSilentText('/start 를 눌러 시작해보세요.')
-        else:
-            EBEST_downloadFile(ARTICLE_URL=inputURL)
-            sendDocument()
 
 
     if data_selected == 0 or data_selected == 1 or data_selected == 2:
+        print('data_selected:',data_selected)
         message_handler = MessageHandler(Filters.text, get_screening_url)
-        updater.dispatcher.add_handler(message_handler)
-    else: # 아무것도 선택 안함 
-        message_handler = MessageHandler(Filters.text, ebestsec_download)
         updater.dispatcher.add_handler(message_handler)
 
     updater.start_polling()
