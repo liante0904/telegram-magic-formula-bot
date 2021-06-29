@@ -298,7 +298,6 @@ def GetSendChatId():
     
     return SendMessageChatId
 
-
 def GetWorkDt(*args):
     global TARGET_URL
     SendMessageChatId = 0
@@ -372,11 +371,10 @@ def excel_write_row(*args):
     strIsuNo = str(args[0])
     nRowIdx  = int(args[1]) + 1 # 첫번째 레코드는 헤더를 쓰기 때문
 
-
-
     TARGET_URL = 'http://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?MenuYn=Y&gicode='+ 'A'+ strIsuNo
     NAVER_URL= 'https://finance.naver.com/item/main.nhn?code=' + strIsuNo
     FNGUIDE_URL = TARGET_URL
+
     webpage = requests.get(TARGET_URL, verify=False)
 
     # HTML parse
@@ -402,6 +400,8 @@ def excel_write_row(*args):
     data_cmp_info = soup.select_one('#bizSummaryContent').text.strip()
     data_거래소 = data_stxt1.strip()#data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
     
+    # print(nRowIdx, data_cmp_nm)
+
     # 첫번째 열은 사용하지 않음
     data_업종 = str(data_업종).replace('KSE','').replace('KOSDAQ', '').replace('코스피', '').replace('코스닥','').strip()
     if len(data_업종) == 0 : data_업종 = str(data_세부업종).replace("FICS",'').strip()
