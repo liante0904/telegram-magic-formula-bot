@@ -77,7 +77,7 @@ write_ws = write_wb.create_sheet('Sheet1')
 write_ws = write_wb.active
 # 엑셀출력 상수
 EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
-    "",               # 0 첫번째 순번은 메모컬럼으로 비워둠
+    "구분",               # 0 첫번째 순번은 메모컬럼으로 비워둠
     "섹터&업종",             # 2
     "종목명",           # 3
     "전일종가(원)",          # 4
@@ -372,6 +372,7 @@ def excel_write_title(*args):
     for idx in range(1, len(EXCEL_TITLE)):
         write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
 
+    write_ws.auto_filter.ref = "A1:R1"
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
 
 def excel_write_row(*args):
