@@ -77,7 +77,7 @@ write_ws = write_wb.create_sheet('Sheet1')
 write_ws = write_wb.active
 # 엑셀출력 상수
 EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
-    "구분",               # 0 첫번째 순번은 메모컬럼으로 비워둠
+    "구분",               # 1 
     "섹터&업종",             # 2
     "종목명",           # 3
     "전일종가(원)",          # 4
@@ -343,10 +343,7 @@ def fnguide_parse(*args):
     data_cmp_info = soup.select_one('#bizSummaryContent').text
     #data_ROE = soup.select_one('#svdMainGrid10D > table > tbody > tr:nth-child(7) > td:nth-child(2)')#.text
 
-    # 데이터 가공처리
-    if data_영업이익률 not in ('', '-'): data_영업이익률 = float(data_영업이익률.replace(',',''))
-    else: data_영업이익률 = ''
-
+    
     r = ''
     r += TARGET_URL + '\n'
     r += '==============================================================' + '\n'
@@ -369,8 +366,8 @@ def fnguide_parse(*args):
 def excel_write_title(*args):
     
     # 타이틀
-    for idx in range(1, len(EXCEL_TITLE)):
-        write_ws.cell(1, idx + 1, EXCEL_TITLE[idx])
+    for idx in range(0, len(EXCEL_TITLE)):
+        write_ws.cell(1, idx+1, EXCEL_TITLE[idx])
 
     write_ws.auto_filter.ref = "A1:R1"
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
@@ -436,8 +433,9 @@ def excel_write_row(*args):
     cell = write_ws.cell(nRowIdx, 6, data_Pbr)
     cell.number_format = '#,##0.00'
 
-    if data_Roe not in ('', '-') and not isinstance(data_Roe, str): data_Roe = float(data_Roe.replace(',',''))
-
+    # if data_Roe not in ('', '-') and not isinstance(data_Roe, str): data_Roe = float(data_Roe.replace(',',''))
+    if data_Roe not in ('', '-') : data_Roe = float(data_Roe.replace(',',''))
+    else: data_Roe = ''
     cell = write_ws.cell(nRowIdx, 7, data_Roe)
     cell.number_format = '#,##0.00'
 
