@@ -77,25 +77,27 @@ write_ws = write_wb.create_sheet('Sheet1')
 write_ws = write_wb.active
 # 엑셀출력 상수
 EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
-    "구분",               # 1 
-    "섹터&업종",             # 2
-    "종목명",           # 3
-    "전일종가(원)",          # 4
-    "PER",              # 5
-    "PBR",              # 6
-    "ROE",              # 7
-    "DPS Yield(%)",    # 8
-    "OPM Yield(%)",     # 9
-    "매출액(억원)",     # 10
-    "영업이익(억원)",   # 11
-    "당기순이익(억원)", # 12
-    "시가총액(억원)",   # 13
-    "자본총계(억원)",   # 14
-    "거래소",            # 15
-    "네이버 금융",      # 16
-    "fnguide",          # 17
-    "기업개요"          # 18
+    "구분",                       # 1 
+    "섹터&업종",                  # 2
+    "종목명",                     # 3
+    "전일종가(원)",               # 4
+    "PER",                        # 5
+    "Fwd PER",                     # 6
+    "PBR",                       # 7
+    "ROE",                       # 8
+    "DPS Yield(%)",             # 9
+    "OPM Yield(%)",             # 10
+    "매출액(억원)",             # 11
+    "영업이익(억원)",           # 12
+    "당기순이익(억원)",         # 13
+    "시가총액(억원)",          # 14
+    "자본총계(억원)",           # 15
+    "거래소",                   # 16
+    "네이버 금융",              # 17
+    "fnguide",                  # 18
+    "기업개요"                  # 19 
 )
+
 
 
 # 메시지 발송 ID
@@ -112,6 +114,9 @@ cursor  = ''
 # 이모지
 EMOJI_FIRE = u'\U0001F525'
 EMOJI_PICK = u'\U0001F449'
+
+# 엑셀 출력을 위한 열 인덱스
+nColIdx = 0 
 
 strFileName = ''
 
@@ -373,7 +378,7 @@ def excel_write_title(*args):
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
 
 def excel_write_row(*args):
-
+    nColIdx = 0    # 항목별 출력을 위한 출력 열 인덱스
     strIsuNo = str(args[0])
     nRowIdx  = int(args[1]) + 1 # 첫번째 레코드는 헤더를 쓰기 때문
 
@@ -385,26 +390,26 @@ def excel_write_row(*args):
 
     # HTML parse
     soup = BeautifulSoup(webpage.content, "html.parser")
-    data_cmp_nm = soup.select_one('#giName').text.strip()
-    data_cmp_code = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text.strip()
-    data_price =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0].strip()
-    data_stxt1 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text.strip()
-    data_업종 = data_stxt1.strip()
-    data_세부업종 = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt2').text.strip()
-    data_stxt2 = soup.select_one('#strMarketTxt').text.strip()
+    data_cmp_nm     = soup.select_one('#giName').text.strip()
+    data_cmp_code   = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > h2').text.strip()
+    data_price      =  soup.select_one('#svdMainGrid1 > table > tbody > tr.rwf > td:nth-child(2)').text.split("/")[0].strip()
+    data_stxt1      = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt1').text.strip()
+    data_업종       = data_stxt1.strip()
+    data_세부업종   = soup.select_one('#compBody > div.section.ul_corpinfo > div.corp_group1 > p > span.stxt.stxt2').text.strip()
+    data_stxt2      = soup.select_one('#strMarketTxt').text.strip()
     data_영업이익률 = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(15) > td:nth-child(4)').text.strip()
-    data_Per = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text.strip()
-    data_Pbr = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text.strip()
-    data_Roe = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text.strip()
-    data_Roa = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(17) > td:nth-child(4)').text.strip()
+    data_Per        = soup.select_one('#corp_group2 > dl:nth-child(1) > dd').text.strip()
+    data_Pbr        = soup.select_one('#corp_group2 > dl:nth-child(4) > dd').text.strip()
+    data_Roe        = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(18) > td:nth-child(4)').text.strip()
+    data_Roa        = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(17) > td:nth-child(4)').text.strip()
     
-    data_Dpsyield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text.strip().replace('%','')
-    data_시가총액 = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text.strip()
-    data_매출액 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text.strip()
-    data_영업이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text.strip()
-    data_당기순이익= soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(4) > td:nth-child(4)').text.strip()
-    data_자본총계 = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(7) > td:nth-child(4)').text.strip()
-    data_fwdPer = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text.strip()
+    data_Dpsyield   = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text.strip().replace('%','')
+    data_시가총액   = soup.select_one('#svdMainGrid1 > table > tbody > tr:nth-child(5) > td:nth-child(2)').text.strip()
+    data_매출액     = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(1) > td:nth-child(4)').text.strip()
+    data_영업이익   = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(2) > td:nth-child(4)').text.strip()
+    data_당기순이익 = soup.select_one('#highlight_B_A > table > tbody > tr:nth-child(4) > td:nth-child(4)').text.strip()
+    data_자본총계   = soup.select_one('#highlight_D_A > table > tbody > tr:nth-child(7) > td:nth-child(4)').text.strip()
+    data_fwdPer     = soup.select_one('#corp_group2 > dl:nth-child(2) > dd').text.strip()
     data_dividendYield = soup.select_one('#corp_group2 > dl:nth-child(5) > dd').text.strip()
     data_cmp_info = soup.select_one('#bizSummaryContent').text.strip()
     data_거래소 = data_stxt1.strip()#data_stxt1.strip().split(" ")[0].split("\xa0\xa0")[1]
@@ -415,76 +420,111 @@ def excel_write_row(*args):
     data_업종 = str(data_업종).replace('KSE','').replace('KOSDAQ', '').replace('코스피', '').replace('코스닥','').strip()
     if len(data_업종) == 0 : data_업종 = str(data_세부업종).replace("FICS",'').strip()
 
-    write_ws.cell(nRowIdx, 2, data_업종)
-    write_ws.cell(nRowIdx, 3, data_cmp_nm)
+    SetColIdx(2) # 열 인덱스 출력 시작점
+
+    write_ws.cell(nRowIdx, GetColIdx(1), data_업종)
+    write_ws.cell(nRowIdx, GetColIdx(1), data_cmp_nm)
 
     if data_price not in ('', '-'): data_price = float(data_price.replace(',',''))
     else: data_price = ''
-    cell = write_ws.cell(nRowIdx, 4, data_price)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_price)
     cell.number_format = '#,##0'
 
     if data_Per not in ('', '-'): data_Per = float(data_Per.replace(',',''))
-    else: data_Per = ''
-    cell = write_ws.cell(nRowIdx, 5, data_Per)
+    else: data_Per = '-'
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Per)
+    cell.number_format = '#,##0.00'
+
+    if data_fwdPer not in ('', '-'): data_fwdPer = float(data_fwdPer.replace(',',''))
+    else: data_fwdPer = '-'
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_fwdPer)
     cell.number_format = '#,##0.00'
 
     if data_Pbr not in ('', '-'): data_Pbr = float(data_Pbr.replace(',',''))
     else: data_Pbr = ''
-    cell = write_ws.cell(nRowIdx, 6, data_Pbr)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Pbr)
     cell.number_format = '#,##0.00'
 
     # if data_Roe not in ('', '-') and not isinstance(data_Roe, str): data_Roe = float(data_Roe.replace(',',''))
     if data_Roe not in ('', '-') : data_Roe = float(data_Roe.replace(',',''))
     else: data_Roe = ''
-    cell = write_ws.cell(nRowIdx, 7, data_Roe)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Roe)
     cell.number_format = '#,##0.00'
 
     if data_Dpsyield not in ('', '-'): data_Dpsyield = float(data_Dpsyield.replace(',',''))
     else: data_Dpsyield = ''
-    cell = write_ws.cell(nRowIdx, 8, data_Dpsyield)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Dpsyield)
     cell.number_format = '#,##0.00'
 
     if data_영업이익률 not in ('', '-'): data_영업이익률 = float(data_영업이익률.replace(',',''))
     else: data_영업이익률 = ''
-    cell = write_ws.cell(nRowIdx, 9, data_영업이익률)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_영업이익률)
     cell.number_format = '#,##0.00'
 
     if data_매출액 not in ('', '-'): data_매출액 = float(data_매출액.replace(',',''))
-    cell = write_ws.cell(nRowIdx, 10, data_매출액)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_매출액)
     cell.number_format = '#,##0'
 
     if data_영업이익 not in ('', '-'): data_영업이익 = float(data_영업이익.replace(',',''))
-    cell = write_ws.cell(nRowIdx, 11, data_영업이익)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_영업이익)
     cell.number_format = '#,##0'
 
     if data_당기순이익 not in ('', '-'): data_당기순이익 = float(data_당기순이익.replace(',',''))
-    cell = write_ws.cell(nRowIdx, 12, data_당기순이익)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_당기순이익)
     cell.number_format = '#,##0'
 
     if data_시가총액 not in ('', '-'): data_시가총액 = float(data_시가총액.replace(',',''))
-    cell = write_ws.cell(nRowIdx, 13, data_시가총액)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_시가총액)
     cell.number_format = '#,##0'
 
     if data_자본총계 not in ('', '-'): data_자본총계 = float(data_자본총계.replace(',',''))
-    cell = write_ws.cell(nRowIdx, 14, data_자본총계)
+    cell = write_ws.cell(nRowIdx, GetColIdx(1), data_자본총계)
     cell.number_format = '#,##0'
     
 
     if 'KOSDAQ' in data_거래소 :  data_거래소 = 'KOSDAQ'
     else: data_거래소 = 'KOSPI'
-    write_ws.cell(nRowIdx, 15, data_거래소)
+    write_ws.cell(nRowIdx, GetColIdx(1), data_거래소)
     
     # 네이버 링크
-    write_ws.cell(nRowIdx, 16).hyperlink = NAVER_URL
-    write_ws.cell(nRowIdx, 16).value =  data_cmp_nm+ '('+ data_cmp_code +')'
-    write_ws.cell(nRowIdx, 16).style = "Hyperlink"
+    write_ws.cell(nRowIdx, GetColIdx(0)).hyperlink = NAVER_URL
+    write_ws.cell(nRowIdx, GetColIdx(0)).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, GetColIdx(0)).style = "Hyperlink"
 
     # FNGUIDE 링크
-    write_ws.cell(nRowIdx, 17).hyperlink = FNGUIDE_URL
-    write_ws.cell(nRowIdx, 17).value =  data_cmp_nm+ '('+ data_cmp_code +')'
-    write_ws.cell(nRowIdx, 17).style = "Hyperlink"
+    write_ws.cell(nRowIdx, GetColIdx(1)).hyperlink = FNGUIDE_URL
+    write_ws.cell(nRowIdx, GetColIdx(0)).value =  data_cmp_nm+ '('+ data_cmp_code +')'
+    write_ws.cell(nRowIdx, GetColIdx(1)).style = "Hyperlink"
 
-    write_ws.cell(nRowIdx, 18, str(data_cmp_info).strip())
+    write_ws.cell(nRowIdx, GetColIdx(1), str(data_cmp_info).strip())
+
+def SetColIdx(*args):
+    global nColIdx
+
+    try:
+        nColIdx = args[0]
+    except:
+        nColIdx = 0 
+
+    return nColIdx
+
+# ColIdx 반환과 인덱스 계산 함수
+# 인자값에 만큼 인덱스를 증가 시킴
+# 인자가 없는 경우 0으로 간주
+# return 인자는 nCurColIdx (현재 인덱스)
+def GetColIdx(*args):
+    global nColIdx
+
+    nCurColIdx = nColIdx
+    try:
+        nIncrIdx = args[0]
+    except:
+        nIncrIdx = 0 
+
+    nColIdx = nColIdx + nIncrIdx
+    
+    return nCurColIdx
+
 
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
