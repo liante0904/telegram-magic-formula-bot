@@ -430,12 +430,12 @@ def excel_write_row(*args):
     cell = write_ws.cell(nRowIdx, GetColIdx(1), data_price)
     cell.number_format = '#,##0'
 
-    if data_Per not in ('', '-'): data_Per = float(data_Per.replace(',',''))
+    if data_Per not in ('', '-', 'N/A'): data_Per = float(data_Per.replace(',',''))
     else: data_Per = '-'
     cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Per)
     cell.number_format = '#,##0.00'
 
-    if data_fwdPer not in ('', '-'): data_fwdPer = float(data_fwdPer.replace(',',''))
+    if data_fwdPer not in ('', '-', 'N/A'): data_fwdPer = float(data_fwdPer.replace(',',''))
     else: data_fwdPer = '-'
     cell = write_ws.cell(nRowIdx, GetColIdx(1), data_fwdPer)
     cell.number_format = '#,##0.00'
