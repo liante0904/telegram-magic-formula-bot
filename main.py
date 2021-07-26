@@ -489,10 +489,10 @@ def excel_write_row(*args):
     # 네이버 링크
     write_ws.cell(nRowIdx, GetColIdx(0)).hyperlink = NAVER_URL
     write_ws.cell(nRowIdx, GetColIdx(0)).value =  data_cmp_nm+ '('+ data_cmp_code +')'
-    write_ws.cell(nRowIdx, GetColIdx(0)).style = "Hyperlink"
+    write_ws.cell(nRowIdx, GetColIdx(1)).style = "Hyperlink"
 
     # FNGUIDE 링크
-    write_ws.cell(nRowIdx, GetColIdx(1)).hyperlink = FNGUIDE_URL
+    write_ws.cell(nRowIdx, GetColIdx(0)).hyperlink = FNGUIDE_URL
     write_ws.cell(nRowIdx, GetColIdx(0)).value =  data_cmp_nm+ '('+ data_cmp_code +')'
     write_ws.cell(nRowIdx, GetColIdx(1)).style = "Hyperlink"
 
