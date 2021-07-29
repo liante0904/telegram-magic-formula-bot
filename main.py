@@ -374,7 +374,7 @@ def excel_write_title(*args):
     for idx in range(0, len(EXCEL_TITLE)):
         write_ws.cell(1, idx+1, EXCEL_TITLE[idx])
 
-    write_ws.auto_filter.ref = "A1:R1"
+    write_ws.auto_filter.ref = "A1:S1"
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
 
 def excel_write_row(*args):
