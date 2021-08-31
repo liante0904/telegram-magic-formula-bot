@@ -445,9 +445,12 @@ def excel_write_row(*args):
     cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Pbr)
     cell.number_format = '#,##0.00'
 
-    # if data_Roe not in ('', '-') and not isinstance(data_Roe, str): data_Roe = float(data_Roe.replace(',',''))
-    if data_Roe not in ('', '-') : data_Roe = float(data_Roe.replace(',',''))
-    else: data_Roe = ''
+    try:
+        data_Roe = float(data_Roe.replace(',',''))
+    except:
+        data_Roe = ''
+    #if data_Roe not in ('', '-') : data_Roe = float(data_Roe.replace(',',''))
+    #else: data_Roe = ''
     cell = write_ws.cell(nRowIdx, GetColIdx(1), data_Roe)
     cell.number_format = '#,##0.00'
 
