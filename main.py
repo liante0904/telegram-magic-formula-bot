@@ -615,11 +615,19 @@ def main():
         print("callback")
         data_selected = int(update.callback_query.data)
         print(data_selected)
+
         if data_selected == 0 or data_selected == 2:
-            # 스크리닝 공식 받기
+        
+        #     # 스크리닝 공식 받기
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
+            # context.bot.edit_message_text(text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging',
+            #                             chat_id=update.callback_query.message.message_id,
+            #                             message_id=update.callback_query.message.message_id)
+            # context.bot.edit_message_text(text="가이드를 참조하여 스크리닝 URL을 입력하세요.",
+            #                             chat_id=update.callback_query.message.message_id,
+            #                             message_id=update.callback_query.message.message_id)
             bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
             bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
