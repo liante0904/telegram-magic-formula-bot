@@ -599,7 +599,7 @@ def main():
         reply_markup = InlineKeyboardMarkup( task_buttons )
         
         context.bot.send_message(
-            chat_id=update.callback_query.message.chat_id
+            chat_id=update.message.chat_id
             , text='작업을 선택해주세요.'
             , reply_markup=reply_markup
         )
