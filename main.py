@@ -603,7 +603,7 @@ def main():
         global data_selected
         global chat_id 
 
-        chat_id = update.callback_query.message.chat_id
+        chat_id = update.message.chat_id
         print("callback")
         data_selected = int(update.callback_query.data)
         print(data_selected)
@@ -612,20 +612,20 @@ def main():
         
         #     # 스크리닝 공식 받기
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-                                        chat_id=update.callback_query.message.chat_id,
+                                        chat_id=update.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             context.bot.edit_message_text(text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging',
-                                        chat_id=update.callback_query.message.chat_id,
+                                        chat_id=update.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             # context.bot.edit_message_text(text="가이드를 참조하여 스크리닝 URL을 입력하세요.",
             #                             chat_id=update.callback_query.message.message_id,
             #                             message_id=update.callback_query.message.message_id)
-            # bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
-            # bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            # bot.sendMessage(chat_id=update.message.chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
+            # bot.sendMessage(chat_id=update.message.chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-                                        chat_id=update.callback_query.message.chat_id,
+                                        chat_id=update.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             MagicFormula_crowling(1)
             '''
@@ -638,7 +638,7 @@ def main():
             return 
             print("준비중")
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[0]),
-                                        chat_id=update.callback_query.message.chat_id,
+                                        chat_id=update.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
         
     updater.dispatcher.add_handler(CallbackQueryHandler(callback_get))
@@ -647,17 +647,17 @@ def main():
     def get_screening_url(update, context):
         global chat_id 
 
-        chat_id = update.callback_query.message.chat_id
+        chat_id = update.message.chat_id
         if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
             # update.message.reply_text("가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')
             # URL 형태가 아닌 경우 다시 입력을 받을 수 있는지 여부 확인
             if 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp' not in inputURL:
-                bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="스크리닝 URL 타입이 올바르지 않습니다. 확인해주세요.")
+                bot.sendMessage(chat_id=update.message.chat_id, text="스크리닝 URL 타입이 올바르지 않습니다. 확인해주세요.")
 
             if inputURL.find("&workDT=") < 0 :
-                bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="스크리닝 URL을 재생성 해주세요.")
+                bot.sendMessage(chat_id=update.message.chat_id, text="스크리닝 URL을 재생성 해주세요.")
             
             URL = update.message.text
             MagicFormula_crowling(data_selected, URL)
