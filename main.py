@@ -603,7 +603,7 @@ def main():
         global data_selected
         global chat_id 
 
-        chat_id = update.message.chat_id
+        chat_id = update.callback_query.message.chat_id
         print("callback")
         data_selected = int(update.callback_query.data)
         print(data_selected)
@@ -612,8 +612,8 @@ def main():
         
         #     # 스크리닝 공식 받기
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-                                        chat_id=update.message.chat_id,
-                                        message_id=update.callback_query.message.message_id)
+                                        chat_id=update.callback_query.message.chat_id,
+                                        message_id=update.callback_query.message.chat_id)
             context.bot.edit_message_text(text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging',
                                         chat_id=update.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
@@ -625,21 +625,9 @@ def main():
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
-                                        chat_id=update.message.chat_id,
+                                        chat_id=update.callback_query.message.message_id,
                                         message_id=update.callback_query.message.message_id)
             MagicFormula_crowling(1)
-            '''
-            try:                                      
-                MagicFormula_crowling(1)
-            except:
-                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.") '''
-                
-        else:
-            return 
-            print("준비중")
-            context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[0]),
-                                        chat_id=update.message.chat_id,
-                                        message_id=update.callback_query.message.message_id)
         
     updater.dispatcher.add_handler(CallbackQueryHandler(callback_get))
 
@@ -660,12 +648,7 @@ def main():
                 bot.sendMessage(chat_id=update.message.chat_id, text="스크리닝 URL을 재생성 해주세요.")
             
             URL = update.message.text
-            MagicFormula_crowling(data_selected, URL)
-            return
-            try:
-                MagicFormula_crowling(0, URL)
-            except:
-                bot.sendMessage(chat_id=chat_id, text="스크리닝 집계중 오류가 발생하였습니다. 관리자에게 문의해주세요.")                
+            MagicFormula_crowling(data_selected, URL)          
 
 
     if data_selected == 0 or data_selected == 1 or data_selected == 2:
