@@ -569,20 +569,20 @@ def main():
     
     print('########Program Start Run########')
 
-    BOT_TOKEN='672768316:AAHXpYmnMzGp_eH0i-juikUFU6q9y78CBhA'
     BOT_TOKEN= "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
     
     bot = telegram.Bot( token=BOT_TOKEN )
-    try:
-        chat_id = bot.getUpdates()[-1].message.chat.id
-        CHAT_ID = bot.getUpdates()[-1].message.chat.id
-        print(chat_id)
-    except IndexError:
-        pass
-        chat_id = '183792411'
-        CHAT_ID = '183792411'
+
+    # try:
+    #     chat_id = bot.getUpdates()[-1].message.chat.id
+    #     CHAT_ID = bot.getUpdates()[-1].message.chat.id
+    #     print(chat_id)
+    # except IndexError:
+    #     pass
+    #     chat_id = '183792411'
+    #     CHAT_ID = '183792411'
     
-    bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
+    # bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
 
     updater = Updater( token=BOT_TOKEN, use_context=True )
     # 버튼 UI dispatcher
@@ -599,7 +599,7 @@ def main():
         reply_markup = InlineKeyboardMarkup( task_buttons )
         
         context.bot.send_message(
-            chat_id=update.message.chat_id
+            chat_id=update.callback_query.message.chat_id
             , text='작업을 선택해주세요.'
             , reply_markup=reply_markup
         )
@@ -620,8 +620,8 @@ def main():
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
-            bot.sendMessage(chat_id=chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
-            bot.sendMessage(chat_id=chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging')     
+            bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
 
         elif data_selected == 1:
             context.bot.edit_message_text(text="{}이(가) 선택되었습니다".format(SELECT_ITEM[data_selected]),
@@ -651,10 +651,10 @@ def main():
             # update.message.reply_text("가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be')
             # URL 형태가 아닌 경우 다시 입력을 받을 수 있는지 여부 확인
             if 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp' not in inputURL:
-                bot.sendMessage(chat_id=chat_id, text="스크리닝 URL 타입이 올바르지 않습니다. 확인해주세요.")
+                bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="스크리닝 URL 타입이 올바르지 않습니다. 확인해주세요.")
 
             if inputURL.find("&workDT=") < 0 :
-                bot.sendMessage(chat_id=chat_id, text="스크리닝 URL을 재생성 해주세요.")
+                bot.sendMessage(chat_id=update.callback_query.message.chat_id, text="스크리닝 URL을 재생성 해주세요.")
             
             URL = update.message.text
             MagicFormula_crowling(data_selected, URL)
