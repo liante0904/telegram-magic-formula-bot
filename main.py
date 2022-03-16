@@ -101,7 +101,8 @@ EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
 
 
 # 메시지 발송 ID
-CHAT_ID = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
+chat_id = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
+chat_id = ''
 # 퀀트 URL 변수
 TARGET_URL = ''
 # BOT_API
@@ -261,7 +262,7 @@ def MagicFormula_crowling(*args):
     return True
 
 def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
-    global CHAT_ID
+    global chat_id
 
     print('sendText()')
 
@@ -271,12 +272,12 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
-    bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 
 def sendDocument(): # 가공없이 첨부파일을 발송합니다.
-    global CHAT_ID
+    global chat_id
 
     print('sendDocument()')
 
@@ -286,9 +287,9 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
-    bot.sendDocument(chat_id = CHAT_ID, document =  open( strFileName, 'rb'))
+    bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
-    # bot.sendMessage(chat_id = CHAT_ID, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
 
 def GetSendChatId():
     SendMessageChatId = 0
@@ -564,7 +565,7 @@ def GetCurrentDate(*args):
     return DATE
 
 def main():
-    global CHAT_ID
+    global chat_id
     global data_selected
     
     print('########Program Start Run########')
@@ -574,21 +575,20 @@ def main():
     bot = telegram.Bot( token=BOT_TOKEN )
 
     # try:
-    #     chat_id = bot.getUpdates()[-1].message.chat.id
-    #     CHAT_ID = bot.getUpdates()[-1].message.chat.id
+    #     chat_id = bot.getUpdates()[-1].message.chat.id 
     #     print(chat_id)
     # except IndexError:
     #     pass
-    #     chat_id = '183792411'
-    #     CHAT_ID = '183792411'
+    #     chat_id = '183792411' 
     
-    # bot.sendMessage(chat_id=CHAT_ID, text='/start 를 눌러 시작해보세요 ')
+    # bot.sendMessage(chat_id=chat_id, text='/start 를 눌러 시작해보세요 ')
 
     updater = Updater( token=BOT_TOKEN, use_context=True )
     # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
 
     def start(update, context):
+        chat_id = update.message.chat_id
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
             [ InlineKeyboardButton( '1.마법공식 종목받기(TTM PER 20배 이내, 배당 지급이력, ROE 10%↑ (PER내림차순 정렬)', callback_data=1 ) ],
