@@ -208,7 +208,7 @@ def MagicFormula_crowling(*args):
     print("VAL 값은 우측 상단의 값임")
     print("반복코드는 나중에")
 
-    sendText("입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
+    # sendText("입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
 
     strFileName = str(today)+'.txt'
     if data_selected == 0 or data_selected == 1: strFileName = str(today)+'.txt'
