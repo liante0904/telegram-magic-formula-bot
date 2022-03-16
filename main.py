@@ -593,6 +593,7 @@ def main():
 
     def start(update, context):
         global chat_id
+        
         chat_id = update.message.chat_id
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
@@ -617,6 +618,9 @@ def main():
 
     def callback_get(update, context):
         global data_selected
+        global chat_id 
+
+        chat_id = update.callback_query.message.chat_id
         print("callback")
         data_selected = int(update.callback_query.data)
         print(data_selected)
@@ -658,6 +662,9 @@ def main():
 
 
     def get_screening_url(update, context):
+        global chat_id 
+
+        chat_id = update.callback_query.message.chat_id
         if data_selected == 0 or data_selected == 2:
             inputURL = update.message.text
             # update.message.reply_text("가이드를 참조하여 스크리닝 URL을 입력하세요.")
