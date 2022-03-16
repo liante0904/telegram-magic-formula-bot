@@ -267,9 +267,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     global chat_id
 
     print('sendText()')
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
+ 
     #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
@@ -283,9 +281,7 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     global chat_id
 
     print('sendDocument()')
-
-    #생성한 텔레그램 봇 정보 assign (@ebest_noti_bot)
-    my_token_key = '1372612160:AAHVyndGDmb1N2yEgvlZ_DmUgShqk2F0d4w'
+ 
     #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
@@ -294,20 +290,7 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
-
-def GetSendChatId():
-    SendMessageChatId = 0
-    if SEC_FIRM_ORDER == 998:
-        if  ARTICLE_BOARD_ORDER == 0 : 
-            SendMessageChatId = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-        else:
-            SendMessageChatId = '-1001150510299' # 네이버 많이본 뉴스 채널
-    elif SEC_FIRM_ORDER == 997:
-            SendMessageChatId = '-1001472616534' # 아이투자
-    else:
-        SendMessageChatId = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-    
-    return SendMessageChatId
+ 
 
 def GetWorkDt(*args):
     global TARGET_URL
@@ -632,7 +615,7 @@ def main():
                                         chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             context.bot.edit_message_text(text="가이드 링크 : " + 'https://www.notion.so/shinseunghoon/URL-9b91ddd9b409479ca9a0276d0c5a69be' + '\n' + '\n'+ '스크리닝 링크 : '+ 'http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging',
-                                        chat_id=update.callback_query.message.message_id,
+                                        chat_id=update.callback_query.message.chat_id,
                                         message_id=update.callback_query.message.message_id)
             # context.bot.edit_message_text(text="가이드를 참조하여 스크리닝 URL을 입력하세요.",
             #                             chat_id=update.callback_query.message.message_id,
