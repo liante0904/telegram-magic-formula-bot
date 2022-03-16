@@ -133,6 +133,8 @@ def MagicFormula_crowling(*args):
     global write_wb
     global data_selected
 
+    print("***************MagicFormula_crowling********************")
+    data_selected = 2
     today = date.today()
     yesterday = date.today() - timedelta(1)    
     DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT='+ yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
@@ -272,6 +274,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
+    print(chat_id)
     bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
     
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
@@ -287,6 +290,7 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
     bot = telegram.Bot(token = my_token_key)
 
+    print(chat_id)
     bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
@@ -588,6 +592,7 @@ def main():
     dispatcher = updater.dispatcher
 
     def start(update, context):
+        global chat_id
         chat_id = update.message.chat_id
         task_buttons =  [
             [ InlineKeyboardButton( '0. 스크리닝 직접 입력모드', callback_data=0 ) ],
