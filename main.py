@@ -100,13 +100,10 @@ EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
 
 
 
-# 메시지 발송 ID
-chat_id = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
+# 메시지 발송 ID 
 chat_id = ''
 # 퀀트 URL 변수
-TARGET_URL = ''
-# BOT_API
-BOT_API = "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
+TARGET_URL = '' 
 
 # pymysql 변수
 conn    = ''
@@ -627,18 +624,7 @@ def main():
     
     print('########Program Start Run########')
 
-    BOT_TOKEN= "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM"
-    
-    bot = telegram.Bot( token=BOT_TOKEN )
-
-    # try:
-    #     chat_id = bot.getUpdates()[-1].message.chat.id 
-    #     print(chat_id)
-    # except IndexError:
-    #     pass
-    #     chat_id = '183792411' 
-    
-    # bot.sendMessage(chat_id=chat_id, text='/start 를 눌러 시작해보세요 ')
+    BOT_TOKEN= "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM" 
 
     updater = Updater( token=BOT_TOKEN, use_context=True )
 
@@ -648,10 +634,6 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CallbackQueryHandler(callback_get))          # updater.dispatcher.add_handler(CallbackQueryHandler(callback_get))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, get_screening_url))
-
-    # if data_selected == 0 or data_selected == 1 or data_selected == 2:
-    #     pass
-  
 
     updater.start_polling()
     updater.idle()
