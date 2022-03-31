@@ -269,7 +269,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     print('sendText()')
  
     #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
-    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
+    my_token_key = ' '
     bot = telegram.Bot(token = my_token_key)
 
     print(chat_id)
@@ -284,7 +284,7 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     print('sendDocument()')
  
     #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
-    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
+    my_token_key = ' '
     bot = telegram.Bot(token = my_token_key)
 
     print(chat_id)
