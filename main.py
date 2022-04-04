@@ -38,7 +38,6 @@ datetime.datetime.now(timezone('UTC'))
 # https://heodolf.tistory.com/75
 # https://heodolf.tistory.com/76
 # https://heodolf.tistory.com/77
-# https://api.telegram.org/bot1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM/getUpdates
 # https://minmong.tistory.com/312
 
 # 로직 설명
@@ -98,8 +97,8 @@ EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
     "기업개요"                  # 19 
 )
 
-
-
+# secret key
+TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET = ''
 # 메시지 발송 ID 
 chat_id = ''
 # 퀀트 URL 변수
@@ -160,7 +159,6 @@ def MagicFormula_crowling(*args):
         print("스크리닝 URL에러로 기본값으로")
         TARGET_URL = DEFAULT_URL
         # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
-
 
     try:
         workDt = TARGET_URL.find("&workDT=")
@@ -267,10 +265,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     global chat_id
 
     print('sendText()')
- 
-    #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
-    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
-    bot = telegram.Bot(token = my_token_key)
+    bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
 
     print(chat_id)
     # bot.sendDocument(chat_id = chat_id, text = sendMessageText)
@@ -282,31 +277,13 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     global chat_id
 
     print('sendDocument()')
- 
-    #생성한 텔레그램 봇 정보 assign (@ssh_stock_info_noti_bot)
-    my_token_key = '1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM'
-    bot = telegram.Bot(token = my_token_key)
+    bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
 
     print(chat_id)
     bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
  
-
-def GetWorkDt(*args):
-    global TARGET_URL
-    SendMessageChatId = 0
-    if SEC_FIRM_ORDER == 998:
-        if  ARTICLE_BOARD_ORDER == 0 : 
-            SendMessageChatId = '-1001436418974' # 네이버 실시간 속보 뉴스 채널
-        else:
-            SendMessageChatId = '-1001150510299' # 네이버 많이본 뉴스 채널
-    elif SEC_FIRM_ORDER == 997:
-            SendMessageChatId = '-1001472616534' # 아이투자
-    else:
-        SendMessageChatId = '-1001431056975' # 운영 채널(증권사 신규 레포트 게시물 알림방)
-    
-    return SendMessageChatId
 
 def fnguide_parse(*args):
 
@@ -552,9 +529,6 @@ def GetCurrentDate(*args):
 
     return DATE
 
-
-
-
 def start(update, context):
     global chat_id
     
@@ -617,6 +591,18 @@ def get_screening_url(update, context):
         URL = update.message.text
         MagicFormula_crowling(data_selected, URL, chat_id)          
 
+def GetSecretKey(*args):
+    global TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET
+
+    SECRETS = ''
+    print(os.getcwd())
+    if os.path.isfile(os.path.join(os.getcwd(), 'secrets.json')): # 로컬 개발 환경
+        with open("secrets.json") as f:
+            SECRETS = json.loads(f.read())
+        TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET     =   SECRETS['TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET']
+        
+    else: # 서버 배포 환경(heroku)
+        TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET     =   os.environ.get('TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET')
 
 def main():
     global chat_id
@@ -624,9 +610,7 @@ def main():
     
     print('########Program Start Run########')
 
-    BOT_TOKEN= "1609851580:AAHziXYwvVJqANZhDtg682whClHeaElndZM" 
-
-    updater = Updater( token=BOT_TOKEN, use_context=True )
+    updater = Updater( token=TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET, use_context=True )
 
     # 버튼 UI dispatcher
     dispatcher = updater.dispatcher
