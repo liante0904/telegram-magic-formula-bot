@@ -62,8 +62,11 @@ SELECT_ITEM = (
     "삼성증권",              # 5
     "교보증권"              # 6
 )
+##### 시스템 상수 #####
+dir_now = os.path.dirname(os.path.abspath(__file__))  # real path to dirname
 
 ##### 엑셀 상수 #####
+# 엑셀파일 읽기
 # 엑셀파일 쓰기
 write_wb = Workbook()
 
@@ -98,11 +101,13 @@ EXCEL_TITLE = ( # 엑셀은 인덱스가 아님! (순번1부터)
 )
 
 # secret key
-TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET = ''
+TELEGRTargetBOT_TOKEN_MAGIC_FORMULA_SECRET = ''
 # 메시지 발송 ID 
 chat_id = ''
 # 퀀트 URL 변수
 TARGET_URL = '' 
+# 퀀트 엑셀 변수
+TARGET_FILE = ''
 
 # pymysql 변수
 conn    = ''
@@ -124,30 +129,24 @@ NAVER_URL= 'https://finance.naver.com/item/main.nhn?code='
 # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging 
 # 의 산출 정보를 이용하여 종목 스크리닝 상세 정보를 생성 
 # args[0] = data_selected, 
-# args[1] = URL, 
+# args[1] = Target, 
 # args[2] = chat_id
 def MagicFormula_crowling(*args):
     global strFileName
     global TARGET_URL
+    global TARGET_FILE
     global write_wb
     global data_selected
 
     print("***************MagicFormula_crowling********************")
+
     data_selected = 2
     today = date.today()
     yesterday = date.today() - timedelta(1)    
     DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT='+ yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
-    # http://wise.thewm.co.kr/ASP/Screener/Screener1.asp?ud=#tabPaging
 
-    # print(GetCurrentDate\('YYYYMMDD'))
 
-    # print(today)
-    # print(yesterday.strftime('%Y%m%d'))
-
-    # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
-
-    print('전일:', yesterday.strftime('%Y%m%d'))
-    try: # 사용자의 입력값 받기 시도
+    try: # 사용자의 입력값 확인 (args[0])
         if args[0] == 0 or args[0] == 2:
             print(args[0])
             print("0번모드 사용자 입력모드")
@@ -155,38 +154,36 @@ def MagicFormula_crowling(*args):
         elif args[0] == 1:
             print("1번모드")
             TARGET_URL = DEFAULT_URL 
+            return  sendText("1.마법공식 종목받기는 준비중입니다. ㄷㄷ")
     except IndexError: # 사용자가 입력한 입력값 없을때
         print("스크리닝 URL에러로 기본값으로")
         TARGET_URL = DEFAULT_URL
         # TARGET_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT=' +  yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=V1&orderDirect=A&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%22-3.93%22%2C%22MAX_VAL%22%3A%2222.89%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%225.00%22%2C%22MAX_VAL%22%3A%2240.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2232%22%2C%22MIN_VAL%22%3A%221.00%22%2C%22MAX_VAL%22%3A%228%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
-    try:
-        workDt = TARGET_URL.find("&workDT=")
-    except IndexError:
-        return  sendText("입력한 스크리닝URL이 올바르지 않습니다.")
+    strUserReqDate = ''
+    try: # 사용자의 입력 형식 확인 (args[1])
+        strUserReqDate = args[1]
+    except:
+        sendText("입력한 URL 혹은 파일 형식이 올바르지 않습니다.")
+        return True
 
-    
-    if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
-    else: 
-        if args[0]:
-            userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+    if "http:" in strUserReqDate : strTargetType = "URL"
+    else : strTargetType = "EXCEL"
 
-    print('###URL 확인###')
-    print(TARGET_URL)
-    request = urllib.request.Request(TARGET_URL)
-    #검색 요청 및 처리
-    response = urllib.request.urlopen(request)
-    rescode = response.getcode()
-    if rescode != 200 :return sendText("(http://wise.thewm.co.kr)사이트 접속이 원활하지 않습니다. 잠시후 다시 시도해주세요.")
+    if strTargetType == 'URL':
+        try:
+            workDt = TARGET_URL.find("&workDT=")
+        except IndexError:
+            return  sendText("입력한 스크리닝URL이 올바르지 않습니다.")
 
-    CMP_PAGE_CNT = 10
-    jres = json.loads(response.read().decode('utf-8'))
-    print(jres)
-    try:
-        TOTAL_CMP_CNT = jres['sAllCnt']
-    except KeyError: # While문으로 처리하기 (임시조치 )
-        userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
-        TARGET_URL = TARGET_URL.strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+        
+        if workDt < 0 : return # 입력하신 URL이 올바르지 않습니다.
+        else: 
+            if args[0]:
+                userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+
+        print('###URL 확인###')
+        print(TARGET_URL)
         request = urllib.request.Request(TARGET_URL)
         #검색 요청 및 처리
         response = urllib.request.urlopen(request)
@@ -195,9 +192,25 @@ def MagicFormula_crowling(*args):
 
         CMP_PAGE_CNT = 10
         jres = json.loads(response.read().decode('utf-8'))
-        TOTAL_CMP_CNT = jres['sAllCnt']
+        print(jres)
+        try:
+            TOTAL_CMP_CNT = jres['sAllCnt']
+        except KeyError: # While문으로 처리하기 (임시조치 )
+            userWorkdt = '&workDT=' + TARGET_URL[workDt+8:workDt+16]
+            TARGET_URL = TARGET_URL.strip().replace(userWorkdt, '&workDT=' + yesterday.strftime('%Y%m%d') )
+            request = urllib.request.Request(TARGET_URL)
+            #검색 요청 및 처리
+            response = urllib.request.urlopen(request)
+            rescode = response.getcode()
+            if rescode != 200 :return sendText("(http://wise.thewm.co.kr)사이트 접속이 원활하지 않습니다. 잠시후 다시 시도해주세요.")
 
 
+            CMP_PAGE_CNT = 10
+            jres = json.loads(response.read().decode('utf-8'))
+            TOTAL_CMP_CNT = jres['sAllCnt']
+    else:
+        print('excel')
+        return 
     TOTAL_PAGE_CNT = math.ceil(TOTAL_CMP_CNT / CMP_PAGE_CNT) # 페이지 수 이므로 정수가 아닌 경우 +1
     
     print('한 페이지에 회사 수는', CMP_PAGE_CNT , "건 입니다.")
@@ -267,7 +280,7 @@ def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     print('sendText()')
     bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
 
-    print(chat_id)
+    # print(chat_id)
     # bot.sendDocument(chat_id = chat_id, text = sendMessageText)
     bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
 
@@ -279,7 +292,7 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     print('sendDocument()')
     bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
 
-    print(chat_id)
+    # print(chat_id)
     bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
@@ -591,11 +604,46 @@ def get_screening_url(update, context):
         URL = update.message.text
         MagicFormula_crowling(data_selected, URL, chat_id)          
 
+def get_screening_excel(update, context):
+    global chat_id 
+
+    chat_id = update.message.chat_id
+    file_id_short = update.message.document.file_id
+    file_url = os.path.join(dir_now, update.message.document.file_name)
+    file_name = update.message.document.file_name
+    file_extension = update.message.document.file_name
+    
+    try:
+        file_extension = file_extension.split(".")[1]
+        print(file_extension)
+    except:
+        update.message.reply_text('파일 형식이 올바르지 않습니다. 올바른 파일을 전송해주세요.')
+
+    print(file_extension)
+    if  "xl" not in file_extension  : update.message.reply_text('엑셀 형식이 아닙니다. 올바른 파일을 전송해주세요.')
+
+    context.bot.getFile(file_id_short).download(file_url)
+    update.message.reply_text('file saved')
+    # print(file_id_short, file_url, file_name)
+    return 
+    if data_selected == 0 or data_selected == 2:
+        inputURL = update.message.text
+        # URL 형태가 아닌 경우 다시 입력을 받을 수 있는지 여부 확인
+        if 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp' not in inputURL:
+            context.bot.send_message(chat_id=update.message.chat_id, text="가이드를 참조하여 스크리닝 URL을 입력하세요.")
+            
+
+        if inputURL.find("&workDT=") < 0 :
+            context.bot.send_message(chat_id=update.message.chat_id, text="스크리닝 URL을 재생성 해주세요.")
+        
+        URL = update.message.text
+        MagicFormula_crowling(data_selected, URL, chat_id)          
+
 def GetSecretKey(*args):
     global TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET
 
     SECRETS = ''
-    print(os.getcwd())
+    # print(os.getcwd())
     if os.path.isfile(os.path.join(os.getcwd(), 'secrets.json')): # 로컬 개발 환경
         with open("secrets.json") as f:
             SECRETS = json.loads(f.read())
@@ -609,6 +657,8 @@ def main():
     global data_selected
     
     print('########Program Start Run########')
+    
+    GetSecretKey()
 
     updater = Updater( token=TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET, use_context=True )
 
@@ -618,6 +668,7 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CallbackQueryHandler(callback_get))          # updater.dispatcher.add_handler(CallbackQueryHandler(callback_get))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, get_screening_url))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document, get_screening_excel))
 
     updater.start_polling()
     updater.idle()
