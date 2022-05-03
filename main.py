@@ -51,6 +51,8 @@ datetime.datetime.now(timezone('UTC'))
 #   - 어떻게 구분지을지 생각해봐야함
 # 5. 메시지 발송 방법 변경 (봇 to 사용자 -> 채널에 발송)
 
+############텔레그램 전역변수###########
+MSG = ''
 ############공용 상수############
 # 선택 아이템
 SELECT_ITEM = (
@@ -67,6 +69,7 @@ dir_now = os.path.dirname(os.path.abspath(__file__))  # real path to dirname
 
 ##### 엑셀 상수 #####
 # 엑셀파일 읽기
+load_wb  = ''
 # 엑셀파일 쓰기
 write_wb = Workbook()
 
@@ -145,7 +148,6 @@ def MagicFormula_crowling(*args):
     yesterday = date.today() - timedelta(1)    
     DEFAULT_URL = 'http://wise.thewm.co.kr/ASP/Screener/data/Screener_Termtabledata.asp?market=0&industry=G0&size=0&workDT='+ yesterday.strftime('%Y%m%d') +'&termCount=3&currentPage=1&orderKey=P1&orderDirect=D&jsonParam=%5B%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%2231%22%2C%22MIN_VAL%22%3A%220.01%22%2C%22MAX_VAL%22%3A%2219%22%2C%22Ogb%22%3A%222%22%7D%2C%7B%22Group%22%3A%22V%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%223.00%22%2C%22MAX_VAL%22%3A%2220.00%22%2C%22Ogb%22%3A%221%22%7D%2C%7B%22Group%22%3A%22P%22%2C%22SEQ%22%3A%221%22%2C%22MIN_VAL%22%3A%2210.00%22%2C%22MAX_VAL%22%3A%221388%22%2C%22Ogb%22%3A%222%22%7D%5D'
 
-
     try: # 사용자의 입력값 확인 (args[0])
         if args[0] == 0 or args[0] == 2:
             print(args[0])
@@ -218,7 +220,7 @@ def MagicFormula_crowling(*args):
     print(TOTAL_PAGE_CNT)
     print("VAL 값은 우측 상단의 값임")
     print("반복코드는 나중에")
-
+    sendMessageText = "입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다."
     sendText("입력 받은 조건으로 집계를 시작합니다. \n"+"스크리닝 종목수는 "+ str(TOTAL_CMP_CNT) + " 개 입니다. \n 전체 산출시간은 " + "약 " +  str(math.ceil( (TOTAL_CMP_CNT * 1.5) / 60 )) + "분으로 예상됩니다." )
 
     strFileName = str(today)+'.txt'
@@ -234,6 +236,11 @@ def MagicFormula_crowling(*args):
         print("스크리닝 리스트를 받아오지 못함 + 서버가 정상이라 가정하고 workdt 공휴일 보정처리")
 
     nRowIdx = 0
+    CURRENT_CMP_CNT = 0
+    b20pYN = 1 # 미발송 = 1 
+    b40pYN = 1 # 미발송 = 1
+    b60pYN = 1 # 미발송 = 1
+    b80pYN = 1 # 미발송 = 1
     for idx in range(1, TOTAL_PAGE_CNT+1):
         paging = 'currentPage='
         paging += str(idx)
@@ -260,15 +267,25 @@ def MagicFormula_crowling(*args):
             excel_write_title()
             for r in jres:
                 nRowIdx= nRowIdx + 1
+                CURRENT_CMP_CNT = nRowIdx
                 excel_write_row(r['CMP_CD'], nRowIdx)
                 
-        TARGET_URL = TARGET_URL.replace('currentPage='+ str(idx), 'currentPage='+ str(idx+1)  )
+        TARGET_URL = TARGET_URL.replace( 'currentPage='+ str(idx), 'currentPage='+ str(idx+1) )
+        CURRENT_PROGRESS_PERCENT = int(CURRENT_CMP_CNT / TOTAL_CMP_CNT * 100)
+        print("CURRENT_PROGRESS_PERCENT", CURRENT_PROGRESS_PERCENT, "CURRENT_CMP_CNT", CURRENT_CMP_CNT, "TOTAL_CMP_CNT", TOTAL_CMP_CNT)
+        if CURRENT_PROGRESS_PERCENT in range(0, 19): pass
+        elif CURRENT_PROGRESS_PERCENT in range(20, 39) and b20pYN: sendEditText(sendMessageText + "\n*20% 진행 되었습니다.*"); b20pYN = 0
+        elif CURRENT_PROGRESS_PERCENT in range(40, 59) and b40pYN: sendEditText(sendMessageText + "\n*40% 진행 되었습니다.*"); b40pYN = 0
+        elif CURRENT_PROGRESS_PERCENT in range(60, 79) and b60pYN: sendEditText(sendMessageText + "\n*60% 진행 되었습니다.*"); b60pYN = 0
+        elif CURRENT_PROGRESS_PERCENT in range(80, 99) and b80pYN: sendEditText(sendMessageText + "\n*80% 진행 되었습니다.*"); b80pYN = 0
+        
 
     if data_selected == 0 or data_selected == 1:
         file.close() # 파일 객체 닫기
     elif data_selected == 2:
         write_wb.save(strFileName)
-        
+
+    sendEditText(sendMessageText + "\n완료 되었습니다!")    
     sendDocument() # txt, excel 발송 통합
     sendText('/start 를 눌러 시작해보세요.')
 
@@ -276,16 +293,28 @@ def MagicFormula_crowling(*args):
 
 def sendText(sendMessageText): # 가공없이 텍스트를 발송합니다.
     global chat_id
+    global MSG
 
     print('sendText()')
     bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
 
     # print(chat_id)
     # bot.sendDocument(chat_id = chat_id, text = sendMessageText)
-    bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
-
+    MSG = bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    
     time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
+def sendEditText(sendMessageText): # 가공없이 텍스트를 발송합니다.
+    global chat_id
+    global MSG
 
+    print('sendEditText()')
+    bot = telegram.Bot(token = TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET)
+
+    # print(MSG)
+    # bot.sendDocument(chat_id = chat_id, text = sendMessageText)
+    MSG = bot.editMessageText(chat_id = chat_id, message_id = MSG.message_id , text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
+    
+    time.sleep(2) # 모바일 알림을 받기 위해 8초 텀을 둠(loop 호출시)
 def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     global chat_id
 
@@ -296,8 +325,6 @@ def sendDocument(): # 가공없이 첨부파일을 발송합니다.
     bot.sendDocument(chat_id = chat_id, document =  open( strFileName, 'rb'))
 
     # bot.sendMessage(chat_id = chat_id, text = sendMessageText, disable_web_page_preview = True, parse_mode = "Markdown")
- 
-
 def fnguide_parse(*args):
 
     pattern = ''
@@ -346,7 +373,6 @@ def fnguide_parse(*args):
     
     
     return r
-
 def excel_write_title(*args):
     
     # 타이틀
@@ -355,7 +381,6 @@ def excel_write_title(*args):
 
     write_ws.auto_filter.ref = "A1:S1"
     write_ws.freeze_panes = 'A2' # 첫번째 Row 틀고정(타이틀)
-
 def excel_write_row(*args):
     nColIdx = 0    # 항목별 출력을 위한 출력 열 인덱스
     strIsuNo = str(args[0])
@@ -479,7 +504,6 @@ def excel_write_row(*args):
     write_ws.cell(nRowIdx, GetColIdx(1)).style = "Hyperlink"
 
     write_ws.cell(nRowIdx, GetColIdx(1), str(data_cmp_info).strip())
-
 def SetColIdx(*args):
     global nColIdx
 
@@ -489,7 +513,6 @@ def SetColIdx(*args):
         nColIdx = 0 
 
     return nColIdx
-
 # ColIdx 반환과 인덱스 계산 함수
 # 인자값에 만큼 인덱스를 증가 시킴
 # 인자가 없는 경우 0으로 간주
@@ -506,8 +529,6 @@ def GetColIdx(*args):
     nColIdx = nColIdx + nIncrIdx
     
     return nCurColIdx
-
-
 # 시간 및 날짜는 모두 한국 시간 (timezone('Asia/Seoul')) 으로 합니다.
 def GetCurrentDate(*args):
     pattern = ''
@@ -541,7 +562,6 @@ def GetCurrentDate(*args):
         DATE = time_now[:10].strip()
 
     return DATE
-
 def start(update, context):
     global chat_id
     
@@ -560,8 +580,6 @@ def start(update, context):
         , text='작업을 선택해주세요.'
         , reply_markup=reply_markup
     )
-
-
 def callback_get(update, context):
     global data_selected
     global chat_id 
@@ -585,8 +603,6 @@ def callback_get(update, context):
                                     chat_id=update.callback_query.message.message_id,
                                     message_id=update.callback_query.message.message_id)
         MagicFormula_crowling(1)
-    
-
 def get_screening_url(update, context):
     global chat_id 
 
@@ -603,7 +619,6 @@ def get_screening_url(update, context):
         
         URL = update.message.text
         MagicFormula_crowling(data_selected, URL, chat_id)          
-
 def get_screening_excel(update, context):
     global chat_id 
 
@@ -615,15 +630,22 @@ def get_screening_excel(update, context):
     
     try:
         file_extension = file_extension.split(".")[1]
-        print(file_extension)
+        # print(file_extension)
     except:
         update.message.reply_text('파일 형식이 올바르지 않습니다. 올바른 파일을 전송해주세요.')
 
-    print(file_extension)
+    # print(file_extension)
     if  "xl" not in file_extension  : update.message.reply_text('엑셀 형식이 아닙니다. 올바른 파일을 전송해주세요.')
+    elif file_extension == "xls" : Convert_xlsx(file_name)
 
+    # 사용자 요청 파일 저장(서버 다운로드)
     context.bot.getFile(file_id_short).download(file_url)
-    update.message.reply_text('file saved')
+    update.message.reply_text('전송한 종목 리스트로 집계를 시작합니다.')
+    f = file_name
+    if excel_read_file(f):
+        pass
+    else:
+        return False
     # print(file_id_short, file_url, file_name)
     return 
     if data_selected == 0 or data_selected == 2:
@@ -638,7 +660,72 @@ def get_screening_excel(update, context):
         
         URL = update.message.text
         MagicFormula_crowling(data_selected, URL, chat_id)          
+def Convert_xlsx(xls_file_path):
+    xlsBook = xlrd.open_workbook(xls_file_path)
+    workbook = openpyxl.Workbook()
 
+    for i in range(0, xlsBook.nsheets):
+        xlsSheet = xlsBook.sheet_by_index(i)
+        sheet = workbook.active if i == 0 else workbook.create_sheet()
+        sheet.title = xlsSheet.name
+
+        for row in range(0, xlsSheet.nrows):
+            for col in range(0, xlsSheet.ncols):
+                colvalue = xlsSheet.cell_value(row, col)
+                print(colvalue)
+                if isinstance(colvalue, str):
+                    colvalue = colvalue.replace('', ' ', 3)		
+	
+                sheet.cell(row=row + 1, column=col + 1).value = colvalue
+    
+    return workbook
+def excel_read_file(*args):
+    global load_wb
+    
+    strExcelFilePath = str(args[0])
+    print('strExcelFilePath', strExcelFilePath)
+    #data_only=Ture로 해줘야 수식이 아닌 값으로 받아온다.
+    load_wb = openpyxl.load_workbook("./"+strExcelFilePath) #, data_only=True)
+    # 
+    # 
+    
+    # openpyxl.utils.exceptions.InvalidFileException: openpyxl does not support the old .xls file format, please use xlrd to read this file, or convert it to the more recent .xlsx file format.
+    # https://soulmatt.tistory.com/entry/%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%97%90%EC%84%9C-xlrd-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EC%9D%B4%EC%9A%A9%ED%95%B4%EC%84%9C-xls-xlsx-%EB%B3%80%ED%99%98%ED%95%98%EA%B8%B0-How-to-convert-xls-to-xlsx-in-python
+    # try:
+    #     strExcelFilePath = str(args[0])
+    #     print('strExcelFilePath', strExcelFilePath)
+    #     #data_only=Ture로 해줘야 수식이 아닌 값으로 받아온다.
+    #     load_wb = openpyxl.load_workbook("./"+strExcelFilePath) #, data_only=True)
+    # except:
+    #     if len(strExcelFilePath): print(strExcelFilePath)
+    #     else: print('엑셀 파일 경로를 확인 해주세요.')
+
+    ws = load_wb.active
+    print('sheetsname:',ws.title)
+    # print(load_wb.sheetnames)
+    for sheet_nm in load_wb.sheetnames: 
+        print('*' * 100) 
+        print('시트명:', sheet_nm) 
+        sheet = load_wb[sheet_nm] 
+        for row_data in sheet.iter_rows(min_row=1): # min_row는 시작 행을 지정 
+            for cell in row_data: 
+                print('[', cell.value, ']') 
+            print('=' * 100) 
+
+    load_wb.close()
+
+
+
+    # #시트 이름으로 불러오기
+    # load_ws = load_wb['Sheet1']
+    
+    # #셀 주소로 값 출력
+    # print(load_ws['A1'].value)
+    
+    # #셀 좌표로 값 출력
+    # print(load_ws.cell(1,2).value)
+
+    return True
 def GetSecretKey(*args):
     global TELEGRAM_BOT_TOKEN_MAGIC_FORMULA_SECRET
 
