@@ -285,7 +285,7 @@ def MagicFormula_crowling(*args):
     elif data_selected == 2:
         write_wb.save(strFileName)
 
-    sendEditText(sendMessageText + "\n완료 되었습니다!")    
+    sendEditText(sendMessageText + "\n*완료 되었습니다!*")    
     sendDocument() # txt, excel 발송 통합
     sendText('/start 를 눌러 시작해보세요.')
 
